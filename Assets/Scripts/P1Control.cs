@@ -9,7 +9,10 @@ public class P1Control : MonoBehaviour
     [Header("選取框")]
     [SerializeField]
     GameObject selectBox;
-
+    [SerializeField]
+    Sprite unselectSprite;
+    [SerializeField]
+    Sprite selectedSprite;
 
     [Header("棋盤")]
     [SerializeField]
@@ -30,6 +33,7 @@ public class P1Control : MonoBehaviour
 
     void Start()
     {
+
         selectBoxPos = Vector2Int.zero;
         isSelect = false;
     }
@@ -61,16 +65,21 @@ public class P1Control : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.G))
         {
-            if (!isSelect)
+            var boardManager = GetComponentInParent<BoardManager>(); //現在的棋盤狀態
+            var chessID = boardManager.Board[selectBoxPos.y, selectBoxPos.x]; //選取框目前選擇的棋ID
+            var selectSpriteRenderer = selectBox.GetComponent<SpriteRenderer>(); //選取框貼圖
+            if (!isSelect && isWhite(chessID))
             {
                 startPos = selectBoxPos;
                 isSelect = true;
+                selectSpriteRenderer.sprite = selectedSprite;
             }
-            else
+            if(isSelect && !isWhite(chessID))
             {
                 endPos = selectBoxPos;
-                GetComponentInParent<BoardManager>().MoveChess(startPos, endPos);
+                boardManager.MoveChess(startPos, endPos);
                 isSelect = false;
+                selectSpriteRenderer.sprite = unselectSprite;
             }
         }
     }
