@@ -10,9 +10,7 @@ public class P1Control : MonoBehaviour
     [SerializeField]
     GameObject selectBox;
     [SerializeField]
-    Sprite unselectSprite;
-    [SerializeField]
-    Sprite selectedSprite;
+    GameObject selectedBox;
 
     [Header("棋盤")]
     [SerializeField]
@@ -23,8 +21,8 @@ public class P1Control : MonoBehaviour
     Vector2 gridSize;
 
     Vector2Int selectBoxPos;
+    Vector2Int selectedBoxPos;
     bool isSelect;
-    Vector2Int startPos, endPos;
     void Awake()
     {
         board.boardOffset = boardOffset;
@@ -33,8 +31,8 @@ public class P1Control : MonoBehaviour
 
     void Start()
     {
-
         selectBoxPos = Vector2Int.zero;
+        selectedBox.SetActive(false);
         isSelect = false;
     }
 
@@ -67,29 +65,30 @@ public class P1Control : MonoBehaviour
         {
             var boardManager = GetComponentInParent<BoardManager>(); //現在的棋盤狀態
             var chessID = boardManager.Board[selectBoxPos.y, selectBoxPos.x]; //選取框目前選擇的棋ID
-            var selectSpriteRenderer = selectBox.GetComponent<SpriteRenderer>(); //選取框貼圖
+            //var selectSpriteRenderer = selectBox.GetComponent<SpriteRenderer>(); //選取框貼圖
             if (!isSelect && isWhite(chessID))
             {
-                startPos = selectBoxPos;
+                selectedBoxPos = selectBoxPos;
                 isSelect = true;
-                selectSpriteRenderer.sprite = selectedSprite;
-            }
-            if(isSelect && !isWhite(chessID))
-            {
-                endPos = selectBoxPos;
-                boardManager.MoveChess(startPos, endPos);
-                isSelect = false;
-                selectSpriteRenderer.sprite = unselectSprite;
-            }
-        }
-    }
 
+            }
+            if (isSelect && !isWhite(chessID))
+            {
+                boardManager.MoveChess(selectedBoxPos, selectBoxPos);
+                isSelect = false;
+            }
+            selectedBox.SetActive(isSelect);
+        }
+        SelectBoxUpdate();
+    }
+    Vector2 getBoardPos(int x, int y) => new Vector2(
+        board.boardOffset.x + x * board.gridSize.x,
+        board.boardOffset.y + y * board.gridSize.y
+    );
     void SelectBoxUpdate()
     {
-        selectBox.transform.position = new Vector2(
-            board.boardOffset.x + selectBoxPos.x * board.gridSize.x,
-            board.boardOffset.y + selectBoxPos.y * board.gridSize.y
-        );
+        selectBox.transform.position = getBoardPos(selectBoxPos.x, selectBoxPos.y);
+        selectedBox.transform.position = getBoardPos(selectedBoxPos.x, selectedBoxPos.y);
     }
 
     void MoveUp()
@@ -98,7 +97,6 @@ public class P1Control : MonoBehaviour
         {
             selectBoxPos.y += 1;
         }
-        SelectBoxUpdate();
     }
 
     void MoveDown()
@@ -107,7 +105,6 @@ public class P1Control : MonoBehaviour
         {
             selectBoxPos.y -= 1;
         }
-        SelectBoxUpdate();
     }
 
     void MoveLeft()
@@ -116,7 +113,6 @@ public class P1Control : MonoBehaviour
         {
             selectBoxPos.x -= 1;
         }
-        SelectBoxUpdate();
     }
 
     void MoveRight()
@@ -125,6 +121,5 @@ public class P1Control : MonoBehaviour
         {
             selectBoxPos.x += 1;
         }
-        SelectBoxUpdate();
     }
 }
