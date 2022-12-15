@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
@@ -72,14 +73,26 @@ public class P1Control : MonoBehaviour
         PlayerInput();
     }
 
-    Vector2 GetBoardPosition(int x, int y) => new Vector2(
+    //棋盤座標轉世界位置
+    Vector2 TransformBoardPosition(int x, int y) => new Vector2(
         board.boardOffset.x + x * board.gridSize.x,
         board.boardOffset.y + y * board.gridSize.y
     );
-    int selectChessID => boardManager.Board[selectBoxPosition.y, selectBoxPosition.x]; //選取框棋ID
-    int selectedChessID => boardManager.Board[selectedBoxPosition.y, selectedBoxPosition.x]; //已選取框棋ID
-    bool isBlack(int chess) => chess < 0;
-    bool isWhite(int chess) => chess > 0;
+
+    //選取框棋ID
+    int selectChessID => boardManager.Board[selectBoxPosition.y, selectBoxPosition.x];
+
+    //已選取框棋ID
+    int selectedChessID => boardManager.Board[selectedBoxPosition.y, selectedBoxPosition.x];
+
+    int chessID(Vector2Int pos) => boardManager.Board[pos.y, pos.x];
+
+    bool isOutSideBoard(Vector2Int pos) => pos.x < 0 || pos.y < 0 || pos.x > 7 || pos.y > 7;
+
+    bool isEnemy(int chess) => chess < 0;
+
+    bool isAllies(int chess) => chess > 0;
+
     void PlayerInput()
     {
         if (Input.GetKeyDown(KeyCode.D))
@@ -101,19 +114,19 @@ public class P1Control : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.G))
         {
             //未選取時
-            if (!isSelect && isWhite(selectChessID))
+            if (!isSelect && isAllies(selectChessID))
             {
                 selectedBoxPosition = selectBoxPosition;
                 canMovePositions = GetCanMovePositions();
                 foreach (var pos in canMovePositions)
                 {
-                    var box = Instantiate(canMoveBox, GetBoardPosition(pos.x, pos.y), Quaternion.identity);
+                    var box = Instantiate(canMoveBox, TransformBoardPosition(pos.x, pos.y), Quaternion.identity);
                     canMoveBoxsTemp.Add(box);
                 }
                 isSelect = true;
             }
             //已選取時
-            if (isSelect && !isWhite(selectChessID))
+            if (isSelect)
             {
                 if (canMovePositions.Exists(pos => pos == selectBoxPosition))
                 {
@@ -143,9 +156,19 @@ public class P1Control : MonoBehaviour
          * 士兵:6
          */
         var Positions = new List<Vector2Int>();
-
-
-        //FIXME 移動路徑有人後面就不能走了、友軍判斷
+        Vector2Int pos;
+        void LineWalk(int x, int y)
+        {
+            for (var i = 1; i <= 7; i++)
+            {
+                pos = selectedBoxPosition + new Vector2Int(i * x, i * y);
+                if (isOutSideBoard(pos) || isAllies(chessID(pos)))
+                    return;
+                Positions.Add(pos);
+                if (isEnemy(chessID(pos)))
+                    return;
+            }
+        }
         switch (selectedChessID)
         {
             //國王
@@ -154,52 +177,73 @@ public class P1Control : MonoBehaviour
                     for (var j = -1; j <= 1; j++)
                         if (!(i == 0 && j == 0))
                         {
-                            var pos = selectedBoxPosition + new Vector2Int(i, j);
+                            pos = selectedBoxPosition + new Vector2Int(i, j);
                             Positions.Add(pos);
                         }
                 break;
             //皇后 
             case 2:
-                for (var i = 1; i <= 7; i++)
-                {
-                    var pos = selectedBoxPosition + new Vector2Int(i, i);
-                    Positions.Add(pos);
-                    pos = selectedBoxPosition + new Vector2Int(-i, i);
-                    Positions.Add(pos);
-                    pos = selectedBoxPosition + new Vector2Int(i, -i);
-                    Positions.Add(pos);
-                    pos = selectedBoxPosition + new Vector2Int(-i, -i);
-                    Positions.Add(pos);
-                }
+                for (var i = -1; i <= 1; i++)
+                    for (var j = -1; j <= 1; j++)
+                        LineWalk(i, j);
                 break;
             //主教
             case 3:
+                for (var i = -1; i <= 1; i += 2)
+                    for (var j = -1; j <= 1; j += 2)
+                        LineWalk(i, j);
 
                 break;
             //騎士
             case 4:
-
+                for (var i = -1; i <= 1; i += 2)
+                    for (var j = -1; j <= 1; j += 2)
+                    {
+                        pos = selectedBoxPosition + new Vector2Int(1 * i, 2 * j);
+                        if (isOutSideBoard(pos) || isAllies(chessID(pos)))
+                            continue;
+                        Positions.Add(pos);
+                    }
+                for (var i = -1; i <= 1; i += 2)
+                    for (var j = -1; j <= 1; j += 2)
+                    {
+                        pos = selectedBoxPosition + new Vector2Int(2 * i, 1 * j);
+                        if (isOutSideBoard(pos) || isAllies(chessID(pos)))
+                            break;
+                        Positions.Add(pos);
+                        if (isEnemy(chessID(pos)))
+                            break;
+                    }
                 break;
             //城堡
             case 5:
-
+                LineWalk(0, 1);
+                LineWalk(0, -1);
+                LineWalk(1, 0);
+                LineWalk(-1, 0);
                 break;
             //士兵
             case 6:
-
+                if (selectBoxPosition.y == 1)
+                {
+                    pos = selectedBoxPosition + Vector2Int.up * 2;
+                    Positions.Add(pos);
+                }
+                pos = selectedBoxPosition + Vector2Int.up;
+                if (isOutSideBoard(pos) || isAllies(chessID(pos)))
+                    break;
+                Positions.Add(pos);
                 break;
-
         }
-        Positions.RemoveAll(p => p.x < 0 || p.y < 0 || p.x > 7 || p.y > 7);
-
+        Positions.RemoveAll(pos => isOutSideBoard(pos) || isAllies(chessID(pos)));
         return Positions;
     }
 
 
     void SelectBoxUpdate()
     {
-        selectBox.transform.position = GetBoardPosition(selectBoxPosition.x, selectBoxPosition.y);
-        selectedBox.transform.position = GetBoardPosition(selectedBoxPosition.x, selectedBoxPosition.y);
+        selectBox.transform.position = TransformBoardPosition(selectBoxPosition.x, selectBoxPosition.y);
+        selectedBox.transform.position = TransformBoardPosition(selectedBoxPosition.x, selectedBoxPosition.y);
     }
 
     void MoveUp()
