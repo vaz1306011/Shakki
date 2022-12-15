@@ -28,13 +28,9 @@ public class P1Board : MonoBehaviour
         DrawBoard();
     }
 
-    public void DrawBoard()
+    void DrawBoard()
     {
         var board = GetComponentInParent<BoardManager>().Board;
-        //for (int y = 0; y < 8; y++)
-        //{
-        //    print($"{board[y,0]} {board[y, 1]} {board[y, 2]} {board[y, 3]} {board[y, 4]} {board[y, 5]} {board[y, 6]} {board[y, 7]}");
-        //}
         for (int y = 0; y < 8; y++)
         {
             for (int x = 0; x < 8; x++)
@@ -51,7 +47,7 @@ public class P1Board : MonoBehaviour
         }
     }
 
-    public void ClearBoard()
+    void ClearBoard()
     {
         foreach (var c in GameObject.FindGameObjectsWithTag("Chess"))
         {

@@ -7,22 +7,50 @@ using UnityEngine.Events;
 public class P1Control : MonoBehaviour
 {
     [Header("選取框")]
+
     [SerializeField]
     GameObject selectBox;
+
     [SerializeField]
     GameObject selectedBox;
 
+    [SerializeField]
+    GameObject canMoveBox;
+
     [Header("棋盤")]
+
     [SerializeField]
     P1Board board;
+
     [SerializeField]
     Vector2 boardOffset;
+
     [SerializeField]
     Vector2 gridSize;
 
-    Vector2Int selectBoxPos;
-    Vector2Int selectedBoxPos;
-    bool isSelect;
+    BoardManager boardManager;
+    Vector2Int selectBoxPosition;
+    Vector2Int selectedBoxPosition;
+    List<GameObject> canMoveBoxsTemp;
+    List<Vector2Int> canMovePositions;
+    bool _isSelect;
+    bool isSelect
+    {
+        get { return _isSelect; }
+        set
+        {
+            _isSelect = value;
+            if (!value)
+            {
+                while (canMoveBoxsTemp.Count > 0)
+                {
+                    Destroy(canMoveBoxsTemp[0]);
+                    canMoveBoxsTemp.RemoveAt(0);
+                }
+            }
+            selectedBox.SetActive(value);
+        }
+    }
     void Awake()
     {
         board.boardOffset = boardOffset;
@@ -31,8 +59,11 @@ public class P1Control : MonoBehaviour
 
     void Start()
     {
-        selectBoxPos = Vector2Int.zero;
+        boardManager = GetComponentInParent<BoardManager>();
+        selectBoxPosition = Vector2Int.zero;
         selectedBox.SetActive(false);
+        canMoveBoxsTemp = new List<GameObject>();
+        canMovePositions = new List<Vector2Int>();
         isSelect = false;
     }
 
@@ -41,6 +72,12 @@ public class P1Control : MonoBehaviour
         PlayerInput();
     }
 
+    Vector2 GetBoardPosition(int x, int y) => new Vector2(
+        board.boardOffset.x + x * board.gridSize.x,
+        board.boardOffset.y + y * board.gridSize.y
+    );
+    int selectChessID => boardManager.Board[selectBoxPosition.y, selectBoxPosition.x]; //選取框棋ID
+    int selectedChessID => boardManager.Board[selectedBoxPosition.y, selectedBoxPosition.x]; //已選取框棋ID
     bool isBlack(int chess) => chess < 0;
     bool isWhite(int chess) => chess > 0;
     void PlayerInput()
@@ -63,63 +100,137 @@ public class P1Control : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.G))
         {
-            var boardManager = GetComponentInParent<BoardManager>(); //現在的棋盤狀態
-            var chessID = boardManager.Board[selectBoxPos.y, selectBoxPos.x]; //選取框目前選擇的棋ID
-            //var selectSpriteRenderer = selectBox.GetComponent<SpriteRenderer>(); //選取框貼圖
-            if (!isSelect && isWhite(chessID))
+            //未選取時
+            if (!isSelect && isWhite(selectChessID))
             {
-                selectedBoxPos = selectBoxPos;
+                selectedBoxPosition = selectBoxPosition;
+                canMovePositions = GetCanMovePositions();
+                foreach (var pos in canMovePositions)
+                {
+                    var box = Instantiate(canMoveBox, GetBoardPosition(pos.x, pos.y), Quaternion.identity);
+                    canMoveBoxsTemp.Add(box);
+                }
                 isSelect = true;
-
             }
-            if (isSelect && !isWhite(chessID))
+            //已選取時
+            if (isSelect && !isWhite(selectChessID))
             {
-                boardManager.MoveChess(selectedBoxPos, selectBoxPos);
-                isSelect = false;
+                if (canMovePositions.Exists(pos => pos == selectBoxPosition))
+                {
+                    boardManager.MoveChess(selectedBoxPosition, selectBoxPosition);
+                    isSelect = false;
+                }
             }
-            selectedBox.SetActive(isSelect);
+        }
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            isSelect = false;
         }
         SelectBoxUpdate();
     }
-    Vector2 getBoardPos(int x, int y) => new Vector2(
-        board.boardOffset.x + x * board.gridSize.x,
-        board.boardOffset.y + y * board.gridSize.y
-    );
+
+    List<Vector2Int> GetCanMovePositions()
+    {
+        /* 
+         * 空:0
+         * 白:+
+         * 黑:-
+         * 國王:1
+         * 皇后:2
+         * 主教:3
+         * 騎士:4
+         * 城堡:5
+         * 士兵:6
+         */
+        var Positions = new List<Vector2Int>();
+
+
+        //FIXME 移動路徑有人後面就不能走了、友軍判斷
+        switch (selectedChessID)
+        {
+            //國王
+            case 1:
+                for (var i = -1; i <= 1; i++)
+                    for (var j = -1; j <= 1; j++)
+                        if (!(i == 0 && j == 0))
+                        {
+                            var pos = selectedBoxPosition + new Vector2Int(i, j);
+                            Positions.Add(pos);
+                        }
+                break;
+            //皇后 
+            case 2:
+                for (var i = 1; i <= 7; i++)
+                {
+                    var pos = selectedBoxPosition + new Vector2Int(i, i);
+                    Positions.Add(pos);
+                    pos = selectedBoxPosition + new Vector2Int(-i, i);
+                    Positions.Add(pos);
+                    pos = selectedBoxPosition + new Vector2Int(i, -i);
+                    Positions.Add(pos);
+                    pos = selectedBoxPosition + new Vector2Int(-i, -i);
+                    Positions.Add(pos);
+                }
+                break;
+            //主教
+            case 3:
+
+                break;
+            //騎士
+            case 4:
+
+                break;
+            //城堡
+            case 5:
+
+                break;
+            //士兵
+            case 6:
+
+                break;
+
+        }
+        Positions.RemoveAll(p => p.x < 0 || p.y < 0 || p.x > 7 || p.y > 7);
+
+        return Positions;
+    }
+
+
     void SelectBoxUpdate()
     {
-        selectBox.transform.position = getBoardPos(selectBoxPos.x, selectBoxPos.y);
-        selectedBox.transform.position = getBoardPos(selectedBoxPos.x, selectedBoxPos.y);
+        selectBox.transform.position = GetBoardPosition(selectBoxPosition.x, selectBoxPosition.y);
+        selectedBox.transform.position = GetBoardPosition(selectedBoxPosition.x, selectedBoxPosition.y);
     }
 
     void MoveUp()
     {
-        if (selectBoxPos.y < 7)
+        if (selectBoxPosition.y < 7)
         {
-            selectBoxPos.y += 1;
+            selectBoxPosition.y += 1;
         }
     }
 
     void MoveDown()
     {
-        if (selectBoxPos.y > 0)
+        if (selectBoxPosition.y > 0)
         {
-            selectBoxPos.y -= 1;
+            selectBoxPosition.y -= 1;
         }
     }
 
     void MoveLeft()
     {
-        if (selectBoxPos.x > 0)
+        if (selectBoxPosition.x > 0)
         {
-            selectBoxPos.x -= 1;
+            selectBoxPosition.x -= 1;
         }
     }
 
     void MoveRight()
     {
-        if (selectBoxPos.x < 7)
+        if (selectBoxPosition.x < 7)
         {
-            selectBoxPos.x += 1;
+            selectBoxPosition.x += 1;
         }
     }
 }
