@@ -26,6 +26,7 @@ public class BoardManager : MonoBehaviour
     {
         ResetBoard();
     }
+    //TODO P1Board跟P2Board同時開更新有bug
     private void Start()
     {
         P1Board.UpdateP1Board();
