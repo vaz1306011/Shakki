@@ -5,29 +5,24 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class P1Control : MonoBehaviour
+public class Controler : MonoBehaviour
 {
+    enum playerType
+    {
+        white, black
+    }
+    [Header("玩家")]
+    [SerializeField] playerType player;
+
     [Header("選取框")]
-
-    [SerializeField]
-    GameObject selectBox;
-
-    [SerializeField]
-    GameObject selectedBox;
-
-    [SerializeField]
-    GameObject canMoveBox;
+    [SerializeField] GameObject selectBox;
+    [SerializeField] GameObject selectedBox;
+    [SerializeField] GameObject canMoveBox;
 
     [Header("棋盤")]
-
-    [SerializeField]
-    P1Board board;
-
-    [SerializeField]
-    Vector2 boardOffset;
-
-    [SerializeField]
-    Vector2 gridSize;
+    [SerializeField] Board board;
+    [SerializeField] Vector2 boardOffset;
+    [SerializeField] Vector2 gridSize;
 
     BoardManager boardManager;
     Vector2Int selectBoxPosition;
@@ -52,6 +47,9 @@ public class P1Control : MonoBehaviour
             selectedBox.SetActive(value);
         }
     }
+    //TODO 王車易位
+    bool canCastling;
+
     void Awake()
     {
         board.boardOffset = boardOffset;
@@ -66,6 +64,7 @@ public class P1Control : MonoBehaviour
         canMoveBoxsTemp = new List<GameObject>();
         canMovePositions = new List<Vector2Int>();
         isSelect = false;
+        canCastling = true;
     }
 
     void Update()
@@ -74,10 +73,9 @@ public class P1Control : MonoBehaviour
     }
 
     //棋盤座標轉世界位置
-    Vector2 TransformBoardPosition(int x, int y) => new Vector2(
-        board.boardOffset.x + x * board.gridSize.x,
-        board.boardOffset.y + y * board.gridSize.y
-    );
+    Vector2 TransformBoardPosition(int x, int y) =>
+        (Vector2)transform.position +
+        new Vector2(x * board.gridSize.x, y * board.gridSize.y);
 
     //選取框棋ID
     int selectChessID => boardManager.Board[selectBoxPosition.y, selectBoxPosition.x];
@@ -89,12 +87,15 @@ public class P1Control : MonoBehaviour
 
     bool isOutSideBoard(Vector2Int pos) => pos.x < 0 || pos.y < 0 || pos.x > 7 || pos.y > 7;
 
-    bool isEnemy(int chess) => chess < 0;
+    bool isEnemy(int chess) => player == playerType.white ? chess < 0 : chess > 0;
 
-    bool isAllies(int chess) => chess > 0;
+    bool isAllies(int chess) => player == playerType.white ? chess > 0 : chess < 0;
 
     void PlayerInput()
     {
+        //TODO P2Controler畫面有倒過來但控制的棋沒有
+        //TODO json讀取快捷鍵
+
         if (Input.GetKeyDown(KeyCode.D))
         {
             MoveRight();
@@ -111,6 +112,14 @@ public class P1Control : MonoBehaviour
         {
             MoveDown();
         }
+        if (selectBoxPosition.x < 0)
+            selectBoxPosition.x = 0;
+        if (selectBoxPosition.y < 0)
+            selectBoxPosition.y = 0;
+        if (selectBoxPosition.x > 7)
+            selectBoxPosition.x = 7;
+        if (selectBoxPosition.y > 7)
+            selectBoxPosition.y = 7;
         if (Input.GetKeyDown(KeyCode.G))
         {
             //未選取時
@@ -173,6 +182,7 @@ public class P1Control : MonoBehaviour
         {
             //國王
             case 1:
+            case -1:
                 for (var i = -1; i <= 1; i++)
                     for (var j = -1; j <= 1; j++)
                         if (!(i == 0 && j == 0))
@@ -183,12 +193,14 @@ public class P1Control : MonoBehaviour
                 break;
             //皇后 
             case 2:
+            case -2:
                 for (var i = -1; i <= 1; i++)
                     for (var j = -1; j <= 1; j++)
                         LineWalk(i, j);
                 break;
             //主教
             case 3:
+            case -3:
                 for (var i = -1; i <= 1; i += 2)
                     for (var j = -1; j <= 1; j += 2)
                         LineWalk(i, j);
@@ -196,6 +208,7 @@ public class P1Control : MonoBehaviour
                 break;
             //騎士
             case 4:
+            case -4:
                 for (var i = -1; i <= 1; i += 2)
                     for (var j = -1; j <= 1; j += 2)
                     {
@@ -217,6 +230,7 @@ public class P1Control : MonoBehaviour
                 break;
             //城堡
             case 5:
+            case -5:
                 LineWalk(0, 1);
                 LineWalk(0, -1);
                 LineWalk(1, 0);
@@ -230,6 +244,17 @@ public class P1Control : MonoBehaviour
                     Positions.Add(pos);
                 }
                 pos = selectedBoxPosition + Vector2Int.up;
+                if (isOutSideBoard(pos) || isAllies(chessID(pos)))
+                    break;
+                Positions.Add(pos);
+                break;
+            case -6:
+                if (selectBoxPosition.y == 6)
+                {
+                    pos = selectedBoxPosition + Vector2Int.down * 2;
+                    Positions.Add(pos);
+                }
+                pos = selectedBoxPosition + Vector2Int.down;
                 if (isOutSideBoard(pos) || isAllies(chessID(pos)))
                     break;
                 Positions.Add(pos);
@@ -248,33 +273,21 @@ public class P1Control : MonoBehaviour
 
     void MoveUp()
     {
-        if (selectBoxPosition.y < 7)
-        {
-            selectBoxPosition.y += 1;
-        }
+        selectBoxPosition.y += 1;
     }
 
     void MoveDown()
     {
-        if (selectBoxPosition.y > 0)
-        {
-            selectBoxPosition.y -= 1;
-        }
+        selectBoxPosition.y -= 1;
     }
 
     void MoveLeft()
     {
-        if (selectBoxPosition.x > 0)
-        {
-            selectBoxPosition.x -= 1;
-        }
+        selectBoxPosition.x -= 1;
     }
 
     void MoveRight()
     {
-        if (selectBoxPosition.x < 7)
-        {
-            selectBoxPosition.x += 1;
-        }
+        selectBoxPosition.x += 1;
     }
 }

@@ -9,7 +9,8 @@ using UnityEngine;
 public class BoardManager : MonoBehaviour
 {
     public int[,] Board;
-    P1Board P1Board;
+    [SerializeField] Board P1Board;
+    [SerializeField] Board P2Board;
     /* 
      * ªÅ:0
      * ¥Õ:+
@@ -25,10 +26,10 @@ public class BoardManager : MonoBehaviour
     {
         ResetBoard();
     }
-
     private void Start()
     {
-        P1Board = GetComponentInChildren<P1Board>();
+        P1Board.UpdateP1Board();
+        //P2Board.UpdateP2Board();
     }
 
     void ResetBoard()
@@ -49,6 +50,7 @@ public class BoardManager : MonoBehaviour
     {
         Board[target.y, target.x] = Board[start.y, start.x];
         Board[start.y, start.x] = 0;
-        P1Board.UpdateBoard();
+        P1Board.UpdateP1Board();
+        //P2Board.UpdateP2Board();
     }
 }
