@@ -226,7 +226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7c7254a122517242857d64c4e85d9a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: -1
+  player: 1
   selectBox: {fileID: 573136970}
   selectedBox: {fileID: 1389235370}
   possibleMoveBox: {fileID: 5833257363735888988, guid: 5b6294619294fce4ca47a76827403199, type: 3}
@@ -715,7 +715,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7c7254a122517242857d64c4e85d9a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: 1
+  player: 0
   selectBox: {fileID: 1355812549}
   selectedBox: {fileID: 292369311}
   possibleMoveBox: {fileID: 5833257363735888988, guid: 5b6294619294fce4ca47a76827403199, type: 3}

@@ -4,6 +4,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+
 public enum PlayerType { white = 1, black = -1 }
 
 public class Controler : MonoBehaviour
@@ -20,19 +21,18 @@ public class Controler : MonoBehaviour
     [SerializeField] Board board;
 
     [Header("快捷鍵")]
-    [SerializeField] KeyCode up;
-    [SerializeField] KeyCode down;
-    [SerializeField] KeyCode left;
-    [SerializeField] KeyCode right;
-    [SerializeField] KeyCode confirm;
-    [SerializeField] KeyCode cancel;
-
+    public KeyCode up;
+    public KeyCode down;
+    public KeyCode left;
+    public KeyCode right;
+    public KeyCode confirm;
+    public KeyCode cancel;
 
     BoardManager boardManager;
-    Vector2Int selectBoxFrame;
-    Vector2Int selectedBoxFrame;
+    Vector2Int selectBoxGrid;
+    Vector2Int selectedBoxGrid;
     List<GameObject> possibleMoveBoxsTemp = new List<GameObject>();
-    List<Vector2Int> possibleMoveFrame = new List<Vector2Int>();
+    List<Vector2Int> possibleMoveGrids = new List<Vector2Int>();
     bool _isSelect;
     bool isSelect
     {
@@ -49,17 +49,14 @@ public class Controler : MonoBehaviour
             selectedBox.SetActive(value);
         }
     }
-    //TODO 王車易位
-    bool canCastling;
 
     void Start()
     {
         boardManager = GetComponentInParent<BoardManager>();
         board.DrawChesses(player);
-        selectBoxFrame = Vector2Int.zero;
+        selectBoxGrid = Vector2Int.zero;
         selectedBox.SetActive(false);
         isSelect = false;
-        canCastling = true;
     }
 
     void Update()
@@ -67,34 +64,30 @@ public class Controler : MonoBehaviour
         PlayerInput();
     }
 
-    //選取框棋ID
-    int SelectChessID => boardManager.GetChessID(player, selectBoxFrame);
+    int GetChessID(Vector2Int grid) => boardManager.GetChessID(player, grid);
 
-    //已選取框棋ID
-    int SelectedChessID => boardManager.GetChessID(player, selectedBoxFrame);
+    bool IsOutSideBoard(Vector2Int grid) => grid.x < 0 || grid.y < 0 || grid.x > 7 || grid.y > 7;
 
-    int GetChessID(Vector2Int pos) => boardManager.GetChessID(player, pos);
+    bool IsEnemy(Vector2Int grid) => player == PlayerType.white ? GetChessID(grid) < 0 : GetChessID(grid) > 0;
 
-    bool IsOutSideBoard(Vector2Int pos) => pos.x < 0 || pos.y < 0 || pos.x > 7 || pos.y > 7;
+    bool IsAllies(Vector2Int grid) => player == PlayerType.white ? GetChessID(grid) > 0 : GetChessID(grid) < 0;
 
-    bool IsEnemy(int chess) => player == PlayerType.white ? chess < 0 : chess > 0;
-
-    bool IsAllies(int chess) => player == PlayerType.white ? chess > 0 : chess < 0;
+    bool IsEmpty(Vector2Int grid) => GetChessID(grid) == 0;
 
     void Move(Vector2Int direction)
     {
-        selectBoxFrame += direction;
+        selectBoxGrid += direction;
 
-        if (selectBoxFrame.x < 0)
-            selectBoxFrame.x = 0;
-        if (selectBoxFrame.y < 0)
-            selectBoxFrame.y = 0;
-        if (selectBoxFrame.x > 7)
-            selectBoxFrame.x = 7;
-        if (selectBoxFrame.y > 7)
-            selectBoxFrame.y = 7;
+        if (selectBoxGrid.x < 0)
+            selectBoxGrid.x = 0;
+        if (selectBoxGrid.y < 0)
+            selectBoxGrid.y = 0;
+        if (selectBoxGrid.x > 7)
+            selectBoxGrid.x = 7;
+        if (selectBoxGrid.y > 7)
+            selectBoxGrid.y = 7;
 
-        selectBox.transform.position = board.TransformPosition(selectBoxFrame);
+        selectBox.transform.position = board.TransformPosition(selectBoxGrid);
     }
 
     void PlayerInput()
@@ -112,24 +105,24 @@ public class Controler : MonoBehaviour
         if (Input.GetKeyDown(confirm))
         {
             //選擇
-            if (!isSelect && IsAllies(SelectChessID))
+            if (!isSelect && IsAllies(selectBoxGrid))
             {
-                selectedBoxFrame = selectBoxFrame;
-                possibleMoveFrame = GetPossibleMovesFrame();
-                foreach (var pos in possibleMoveFrame)
+                selectedBoxGrid = selectBoxGrid;
+                possibleMoveGrids = GetPossibleMoveGrids();
+                foreach (var grid in possibleMoveGrids)
                 {
-                    var box = Instantiate(possibleMoveBox, board.TransformPosition(pos), Quaternion.identity);
+                    var box = Instantiate(possibleMoveBox, board.TransformPosition(grid), Quaternion.identity);
                     possibleMoveBoxsTemp.Add(box);
                 }
                 isSelect = true;
-                selectedBox.transform.position = board.TransformPosition(selectedBoxFrame);
+                selectedBox.transform.position = board.TransformPosition(selectedBoxGrid);
             }
             //確認
             if (isSelect)
             {
-                if (possibleMoveFrame.Exists(pos => pos == selectBoxFrame))
+                if (possibleMoveGrids.Exists(grid => grid == selectBoxGrid))
                 {
-                    boardManager.MoveChess(player, selectedBoxFrame, selectBoxFrame);
+                    boardManager.MoveChess(player, selectedBoxGrid, selectBoxGrid);
                     isSelect = false;
                 }
             }
@@ -138,13 +131,13 @@ public class Controler : MonoBehaviour
             isSelect = false;
 
         if (isSelect)
-            if (IsEnemy(GetChessID(selectedBoxFrame)))
+            if (IsEnemy(selectedBoxGrid))
                 isSelect = false;
 
         board.DrawChesses(player);
     }
 
-    List<Vector2Int> GetPossibleMovesFrame()
+    List<Vector2Int> GetPossibleMoveGrids()
     {
         /* 
          * 空:0
@@ -157,32 +150,75 @@ public class Controler : MonoBehaviour
          * 城堡:5
          * 士兵:6
          */
-        var possibleMovesFrame = new List<Vector2Int>();
-        Vector2Int pos;
-        void LineWalk(int x, int y)
+        var possibleMoveGrids = new List<Vector2Int>();
+        Vector2Int grid;
+
+        bool AddGrid()
+        {
+            if (IsOutSideBoard(grid) || IsAllies(grid))
+                return false;
+            possibleMoveGrids.Add(grid);
+            return true;
+        }
+
+        void CheckCastling(int way)
+        {
+            if (player == PlayerType.white)
+            {
+                if (!boardManager.canCastling[0, way == -1 ? 0 : 1])
+                    return;
+            }
+            else if (player == PlayerType.black)
+            {
+                if (!boardManager.canCastling[1, way == -1 ? 0 : 1])
+                    return;
+            }
+
+            bool canCastling = true;
+            for (int x = selectedBoxGrid.x + way; x != (way == 1 ? 7 : 0); x += way)
+                if (!IsEmpty(Vector2Int.right * x))
+                {
+                    canCastling = false;
+                    break;
+                }
+            if (canCastling)
+            {
+                grid = selectedBoxGrid + Vector2Int.right * way * 2;
+                AddGrid();
+            }
+        }
+
+        void WalkLine(int x, int y)
         {
             for (var i = 1; i <= 7; i++)
             {
-                pos = selectedBoxFrame + new Vector2Int(i * x, i * y);
-                if (IsOutSideBoard(pos) || IsAllies(GetChessID(pos)))
-                    return;
-                possibleMovesFrame.Add(pos);
-                if (IsEnemy(GetChessID(pos)))
+                grid = selectedBoxGrid + new Vector2Int(i * x, i * y);
+                if (AddGrid())
+                {
+                    if (IsEnemy(grid))
+                        return;
+                }
+                else
                     return;
             }
         }
-        switch (SelectedChessID)
+
+        switch (GetChessID(selectBoxGrid))
         {
             //國王
             case 1:
             case -1:
+                //正常移動
                 for (var i = -1; i <= 1; i++)
                     for (var j = -1; j <= 1; j++)
-                        if (!(i == 0 && j == 0))
-                        {
-                            pos = selectedBoxFrame + new Vector2Int(i, j);
-                            possibleMovesFrame.Add(pos);
-                        }
+                    {
+                        grid = selectedBoxGrid + new Vector2Int(i, j);
+                        AddGrid();
+                    }
+
+                //王車易位
+                CheckCastling(-1); //左邊
+                CheckCastling(1);  //右邊
                 break;
 
             //皇后 
@@ -190,7 +226,7 @@ public class Controler : MonoBehaviour
             case -2:
                 for (var i = -1; i <= 1; i++)
                     for (var j = -1; j <= 1; j++)
-                        LineWalk(i, j);
+                        WalkLine(i, j);
                 break;
 
             //主教
@@ -198,7 +234,7 @@ public class Controler : MonoBehaviour
             case -3:
                 for (var i = -1; i <= 1; i += 2)
                     for (var j = -1; j <= 1; j += 2)
-                        LineWalk(i, j);
+                        WalkLine(i, j);
 
                 break;
 
@@ -208,47 +244,66 @@ public class Controler : MonoBehaviour
                 for (var i = -1; i <= 1; i += 2)
                     for (var j = -1; j <= 1; j += 2)
                     {
-                        pos = selectedBoxFrame + new Vector2Int(1 * i, 2 * j);
-                        if (IsOutSideBoard(pos) || IsAllies(GetChessID(pos)))
-                            continue;
-                        possibleMovesFrame.Add(pos);
+                        grid = selectedBoxGrid + new Vector2Int(1 * i, 2 * j);
+                        AddGrid();
                     }
                 for (var i = -1; i <= 1; i += 2)
                     for (var j = -1; j <= 1; j += 2)
                     {
-                        pos = selectedBoxFrame + new Vector2Int(2 * i, 1 * j);
-                        if (IsOutSideBoard(pos) || IsAllies(GetChessID(pos)))
-                            break;
-                        possibleMovesFrame.Add(pos);
-                        if (IsEnemy(GetChessID(pos)))
-                            break;
+                        grid = selectedBoxGrid + new Vector2Int(2 * i, 1 * j);
+                        AddGrid();
                     }
                 break;
 
             //城堡
             case 5:
             case -5:
-                LineWalk(0, 1);
-                LineWalk(0, -1);
-                LineWalk(1, 0);
-                LineWalk(-1, 0);
+                WalkLine(0, 1);
+                WalkLine(0, -1);
+                WalkLine(1, 0);
+                WalkLine(-1, 0);
                 break;
 
             //士兵
             case 6:
             case -6:
-                if (selectBoxFrame.y == 1)
+                //左前敵人
+                bool lrIsEnemy = false;
+                grid = selectedBoxGrid + Vector2Int.up + Vector2Int.left;
+                if (!IsOutSideBoard(grid) && IsEnemy(grid))
                 {
-                    pos = selectedBoxFrame + Vector2Int.up * 2;
-                    possibleMovesFrame.Add(pos);
+                    lrIsEnemy = true;
+                    AddGrid();
                 }
-                pos = selectedBoxFrame + Vector2Int.up;
-                if (IsOutSideBoard(pos) || IsAllies(GetChessID(pos)))
+
+                //右前敵人
+                grid = selectedBoxGrid + Vector2Int.up + Vector2Int.right;
+                if (!IsOutSideBoard(grid) && IsEnemy(grid))
+                {
+                    lrIsEnemy = true;
+                    AddGrid();
+                }
+                if (lrIsEnemy)
                     break;
-                possibleMovesFrame.Add(pos);
+
+                //正常移動
+                if (IsEmpty(selectBoxGrid + Vector2Int.up))
+                {
+                    grid = selectedBoxGrid + Vector2Int.up;
+                    AddGrid();
+                }
+
+                //首次多移動一格
+                if (selectBoxGrid.y == 1 && IsEmpty(selectBoxGrid + Vector2Int.up) && IsEmpty(selectBoxGrid + Vector2Int.up * 2))
+                {
+                    grid = selectedBoxGrid + Vector2Int.up * 2;
+                    AddGrid();
+                }
                 break;
         }
-        possibleMovesFrame.RemoveAll(pos => IsOutSideBoard(pos) || IsAllies(GetChessID(pos)));
-        return possibleMovesFrame;
+
+        return possibleMoveGrids;
+
+
     }
 }

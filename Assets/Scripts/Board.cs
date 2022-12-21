@@ -9,6 +9,7 @@ public class Board : MonoBehaviour
     public Vector2 boardOffset;
     public Vector2 gridSize;
 
+    BoardManager boardManager;
     Dictionary<int, string> chessDic =
         new Dictionary<int, string>()
         {
@@ -17,15 +18,21 @@ public class Board : MonoBehaviour
         };
     List<GameObject> chessTemp = new List<GameObject>();
 
-    public Vector2 TransformPosition(Vector2Int frame) =>
+
+    void Awake()
+    {
+        boardManager = GetComponentInParent<BoardManager>();
+    }
+
+    public Vector2 TransformPosition(Vector2Int grid) =>
         (Vector2)transform.position +
         boardOffset +
-        new Vector2(frame.x * gridSize.x, frame.y * gridSize.y);
+        new Vector2(grid.x * gridSize.x, grid.y * gridSize.y);
 
     public void DrawChesses(PlayerType player)
     {
         ClearBoard();
-        var board = GetComponentInParent<BoardManager>().GetBoard(player);
+        var board = boardManager.GetBoard(player);
         for (int y = 0; y < 8; y++)
         {
             for (int x = 0; x < 8; x++)
@@ -33,11 +40,11 @@ public class Board : MonoBehaviour
                 var chessID = board[y, x];
                 if (chessID != 0)
                 {
-                    var chess = Resources.Load<GameObject>($"Chesses/{chessDic[chessID]}");
-                    var pos = TransformPosition(new Vector2Int(x, y));
-                    var rot = Quaternion.identity;
-                    var obj = Instantiate(chess, pos, rot);
-                    chessTemp.Add(obj);
+                    var chessPrefab = Resources.Load<GameObject>($"Chesses/{chessDic[chessID]}");
+                    var position = TransformPosition(new Vector2Int(x, y));
+                    var rotation = Quaternion.identity;
+                    var chess = Instantiate(chessPrefab, position, rotation);
+                    chessTemp.Add(chess);
                 }
             }
         }

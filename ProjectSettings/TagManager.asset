@@ -13,7 +13,7 @@ TagManager:
   - Water
   - UI
   - Board
-  - Chess
+  - 
   - 
   - 
   - 
@@ -44,4 +44,10 @@ TagManager:
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: SelectBox
+    uniqueID: 3288729893
+    locked: 0
+  - name: SelectedBox
+    uniqueID: 3557946871
     locked: 0
