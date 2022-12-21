@@ -1,14 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using static UnityEngine.GraphicsBuffer;
 
 public class BoardManager : MonoBehaviour
 {
@@ -103,7 +95,7 @@ public class BoardManager : MonoBehaviour
                 unCastling(PlayerType.black, 1);
         }
         //©ö¦ì°õ¦æ
-        if (GetChessID(target) == (int)player * 1 && Math.Abs(target.x - start.x) == 2)
+        if (GetChessID(target) == (int)player * 1 && Mathf.Abs(target.x - start.x) == 2)
         {
             if (target.x == 2) //¥ª
             {

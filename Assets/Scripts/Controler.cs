@@ -1,9 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Events;
 
 public enum PlayerType { white = 1, black = -1 }
 
@@ -268,37 +265,25 @@ public class Controler : MonoBehaviour
             case 6:
             case -6:
                 //左前敵人
-                bool lrIsEnemy = false;
                 grid = selectedBoxGrid + Vector2Int.up + Vector2Int.left;
                 if (!IsOutSideBoard(grid) && IsEnemy(grid))
-                {
-                    lrIsEnemy = true;
                     AddGrid();
-                }
 
                 //右前敵人
                 grid = selectedBoxGrid + Vector2Int.up + Vector2Int.right;
                 if (!IsOutSideBoard(grid) && IsEnemy(grid))
-                {
-                    lrIsEnemy = true;
                     AddGrid();
-                }
-                if (lrIsEnemy)
-                    break;
 
                 //正常移動
-                if (IsEmpty(selectBoxGrid + Vector2Int.up))
-                {
-                    grid = selectedBoxGrid + Vector2Int.up;
-                    AddGrid();
-                }
+                grid = selectedBoxGrid + Vector2Int.up;
+                if (!IsEmpty(grid))
+                    break;
+                AddGrid();
 
                 //首次多移動一格
-                if (selectBoxGrid.y == 1 && IsEmpty(selectBoxGrid + Vector2Int.up) && IsEmpty(selectBoxGrid + Vector2Int.up * 2))
-                {
-                    grid = selectedBoxGrid + Vector2Int.up * 2;
+                grid = selectedBoxGrid + Vector2Int.up * 2;
+                if (selectBoxGrid.y == 1 && IsEmpty(grid))
                     AddGrid();
-                }
                 break;
         }
 
