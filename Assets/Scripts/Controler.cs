@@ -2,34 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PlayerType { white = 1, black = -1 }
 
 public class Controler : MonoBehaviour
 {
     [Header("玩家")]
-    [SerializeField] PlayerType player;
+    [SerializeField] PlayerType _playerType;
 
     [Header("選取框")]
-    [SerializeField] GameObject selectBox;
-    [SerializeField] GameObject selectedBox;
-    [SerializeField] GameObject possibleMoveBox;
+    [SerializeField] GameObject _selectBox;
+    [SerializeField] GameObject _selectedBox;
+    [SerializeField] GameObject _possibleMoveBox;
 
     [Header("棋盤")]
-    [SerializeField] Board board;
+    [SerializeField] Board _board;
 
     [Header("快捷鍵")]
-    public KeyCode up;
-    public KeyCode down;
-    public KeyCode left;
-    public KeyCode right;
-    public KeyCode confirm;
-    public KeyCode cancel;
+    [SerializeField] KeyCode _up;
+    [SerializeField] KeyCode _down;
+    [SerializeField] KeyCode _left;
+    [SerializeField] KeyCode _right;
+    [SerializeField] KeyCode _confirm;
+    [SerializeField] KeyCode _cancel;
+    [SerializeField] KeyCode _backKing;
 
-    BoardManager boardManager;
-    Vector2Int selectBoxGrid;
-    Vector2Int selectedBoxGrid;
-    List<GameObject> possibleMoveBoxsTemp = new List<GameObject>();
-    List<Vector2Int> possibleMoveGrids = new List<Vector2Int>();
+    BoardManager _boardManager;
+    AudioSource _source;
+    Vector2Int _selectBoxGrid = Vector2Int.zero;
+    Vector2Int _selectedBoxGrid;
+    List<GameObject> _possibleMoveBoxsTemp = new List<GameObject>();
+    List<Vector2Int> _possibleMoveGrids = new List<Vector2Int>();
     bool _isSelect;
     bool isSelect
     {
@@ -39,20 +40,20 @@ public class Controler : MonoBehaviour
             _isSelect = value;
             if (!value)
             {
-                foreach (var pmb in possibleMoveBoxsTemp)
+                foreach (var pmb in _possibleMoveBoxsTemp)
                     Destroy(pmb);
-                possibleMoveBoxsTemp.Clear();
+                _possibleMoveBoxsTemp.Clear();
             }
-            selectedBox.SetActive(value);
+            _selectedBox.SetActive(value);
         }
     }
 
     void Start()
     {
-        boardManager = GetComponentInParent<BoardManager>();
-        board.DrawChesses(player);
-        selectBoxGrid = Vector2Int.zero;
-        selectedBox.SetActive(false);
+        _source = GameObject.Find("SE").GetComponent<AudioSource>();
+        _boardManager = GetComponentInParent<BoardManager>();
+        _board.DrawChesses(_playerType);
+        _selectedBox.SetActive(false);
         isSelect = false;
     }
 
@@ -61,77 +62,92 @@ public class Controler : MonoBehaviour
         PlayerInput();
     }
 
-    int GetChessID(Vector2Int grid) => boardManager.GetChessID(player, grid);
+    int GetChessID(Vector2Int grid) => _boardManager.GetChessID(_playerType, grid);
 
     bool IsOutSideBoard(Vector2Int grid) => grid.x < 0 || grid.y < 0 || grid.x > 7 || grid.y > 7;
 
-    bool IsEnemy(Vector2Int grid) => player == PlayerType.white ? GetChessID(grid) < 0 : GetChessID(grid) > 0;
+    bool IsEnemy(Vector2Int grid) => _playerType == PlayerType.White ? GetChessID(grid) < 0 : GetChessID(grid) > 0;
 
-    bool IsAllies(Vector2Int grid) => player == PlayerType.white ? GetChessID(grid) > 0 : GetChessID(grid) < 0;
+    bool IsAllies(Vector2Int grid) => _playerType == PlayerType.White ? GetChessID(grid) > 0 : GetChessID(grid) < 0;
 
     bool IsEmpty(Vector2Int grid) => GetChessID(grid) == 0;
 
+    void UpdateSelectBox() => _selectBox.transform.position = _board.TransformPosition(_selectBoxGrid);
+
     void Move(Vector2Int direction)
     {
-        selectBoxGrid += direction;
+        _selectBoxGrid += direction;
 
-        if (selectBoxGrid.x < 0)
-            selectBoxGrid.x = 0;
-        if (selectBoxGrid.y < 0)
-            selectBoxGrid.y = 0;
-        if (selectBoxGrid.x > 7)
-            selectBoxGrid.x = 7;
-        if (selectBoxGrid.y > 7)
-            selectBoxGrid.y = 7;
+        if (_selectBoxGrid.x < 0)
+            _selectBoxGrid.x = 0;
+        if (_selectBoxGrid.y < 0)
+            _selectBoxGrid.y = 0;
+        if (_selectBoxGrid.x > 7)
+            _selectBoxGrid.x = 7;
+        if (_selectBoxGrid.y > 7)
+            _selectBoxGrid.y = 7;
 
-        selectBox.transform.position = board.TransformPosition(selectBoxGrid);
+        UpdateSelectBox();
+    }
+
+    void BackKing()
+    {
+        _selectBoxGrid = _boardManager.GetKingGrid(_playerType);
+        UpdateSelectBox();
     }
 
     void PlayerInput()
     {
-        //TODO json存取快捷鍵
-        if (Input.GetKeyDown(right))
+        if (UIControler.IsEnabled)
+            return;
+
+        if (Input.GetKeyDown(_right))
             Move(Vector2Int.right);
-        if (Input.GetKeyDown(left))
+        if (Input.GetKeyDown(_left))
             Move(Vector2Int.left);
-        if (Input.GetKeyDown(up))
+        if (Input.GetKeyDown(_up))
             Move(Vector2Int.up);
-        if (Input.GetKeyDown(down))
+        if (Input.GetKeyDown(_down))
             Move(Vector2Int.down);
 
-        if (Input.GetKeyDown(confirm))
+        if (Input.GetKeyDown(_confirm))
         {
             //選擇
-            if (!isSelect && IsAllies(selectBoxGrid))
+            if (!isSelect && IsAllies(_selectBoxGrid))
             {
-                selectedBoxGrid = selectBoxGrid;
-                possibleMoveGrids = GetPossibleMoveGrids();
-                foreach (var grid in possibleMoveGrids)
+                _selectedBoxGrid = _selectBoxGrid;
+                _possibleMoveGrids = GetPossibleMoveGrids();
+                foreach (var grid in _possibleMoveGrids)
                 {
-                    var box = Instantiate(possibleMoveBox, board.TransformPosition(grid), Quaternion.identity);
-                    possibleMoveBoxsTemp.Add(box);
+                    var box = Instantiate(_possibleMoveBox, _board.TransformPosition(grid), Quaternion.identity);
+                    _possibleMoveBoxsTemp.Add(box);
                 }
                 isSelect = true;
-                selectedBox.transform.position = board.TransformPosition(selectedBoxGrid);
+                _selectedBox.transform.position = _board.TransformPosition(_selectedBoxGrid);
+                _source.Play();
             }
             //確認
             if (isSelect)
             {
-                if (possibleMoveGrids.Exists(grid => grid == selectBoxGrid))
+                if (_possibleMoveGrids.Exists(grid => grid == _selectBoxGrid))
                 {
-                    boardManager.MoveChess(player, selectedBoxGrid, selectBoxGrid);
+                    _boardManager.MoveChess(_playerType, _selectedBoxGrid, _selectBoxGrid);
                     isSelect = false;
                 }
+                _source.Play();
             }
         }
-        if (Input.GetKeyDown(cancel))
+        if (Input.GetKeyDown(_cancel))
             isSelect = false;
 
+        if (Input.GetKeyDown(_backKing))
+            BackKing();
+
         if (isSelect)
-            if (IsEnemy(selectedBoxGrid))
+            if (IsEnemy(_selectedBoxGrid))
                 isSelect = false;
 
-        board.DrawChesses(player);
+        _board.DrawChesses(_playerType);
     }
 
     List<Vector2Int> GetPossibleMoveGrids()
@@ -160,19 +176,19 @@ public class Controler : MonoBehaviour
 
         void CheckCastling(int way)
         {
-            if (player == PlayerType.white)
+            if (_playerType == PlayerType.White)
             {
-                if (!boardManager.canCastling[0, way == -1 ? 0 : 1])
+                if (!_boardManager.canCastling[0, way == -1 ? 0 : 1])
                     return;
             }
-            else if (player == PlayerType.black)
+            else if (_playerType == PlayerType.Black)
             {
-                if (!boardManager.canCastling[1, way == -1 ? 0 : 1])
+                if (!_boardManager.canCastling[1, way == -1 ? 0 : 1])
                     return;
             }
 
             bool canCastling = true;
-            for (int x = selectedBoxGrid.x + way; x != (way == 1 ? 7 : 0); x += way)
+            for (int x = _selectedBoxGrid.x + way; x != (way == 1 ? 7 : 0); x += way)
                 if (!IsEmpty(Vector2Int.right * x))
                 {
                     canCastling = false;
@@ -180,7 +196,7 @@ public class Controler : MonoBehaviour
                 }
             if (canCastling)
             {
-                grid = selectedBoxGrid + Vector2Int.right * way * 2;
+                grid = _selectedBoxGrid + Vector2Int.right * way * 2;
                 AddGrid();
             }
         }
@@ -189,7 +205,7 @@ public class Controler : MonoBehaviour
         {
             for (var i = 1; i <= 7; i++)
             {
-                grid = selectedBoxGrid + new Vector2Int(i * x, i * y);
+                grid = _selectedBoxGrid + new Vector2Int(i * x, i * y);
                 if (AddGrid())
                 {
                     if (IsEnemy(grid))
@@ -200,7 +216,7 @@ public class Controler : MonoBehaviour
             }
         }
 
-        switch (GetChessID(selectBoxGrid))
+        switch (GetChessID(_selectBoxGrid))
         {
             //國王
             case 1:
@@ -209,7 +225,7 @@ public class Controler : MonoBehaviour
                 for (var i = -1; i <= 1; i++)
                     for (var j = -1; j <= 1; j++)
                     {
-                        grid = selectedBoxGrid + new Vector2Int(i, j);
+                        grid = _selectedBoxGrid + new Vector2Int(i, j);
                         AddGrid();
                     }
 
@@ -241,13 +257,13 @@ public class Controler : MonoBehaviour
                 for (var i = -1; i <= 1; i += 2)
                     for (var j = -1; j <= 1; j += 2)
                     {
-                        grid = selectedBoxGrid + new Vector2Int(1 * i, 2 * j);
+                        grid = _selectedBoxGrid + new Vector2Int(1 * i, 2 * j);
                         AddGrid();
                     }
                 for (var i = -1; i <= 1; i += 2)
                     for (var j = -1; j <= 1; j += 2)
                     {
-                        grid = selectedBoxGrid + new Vector2Int(2 * i, 1 * j);
+                        grid = _selectedBoxGrid + new Vector2Int(2 * i, 1 * j);
                         AddGrid();
                     }
                 break;
@@ -265,30 +281,54 @@ public class Controler : MonoBehaviour
             case 6:
             case -6:
                 //左前敵人
-                grid = selectedBoxGrid + Vector2Int.up + Vector2Int.left;
+                grid = _selectedBoxGrid + Vector2Int.up + Vector2Int.left;
                 if (!IsOutSideBoard(grid) && IsEnemy(grid))
                     AddGrid();
 
                 //右前敵人
-                grid = selectedBoxGrid + Vector2Int.up + Vector2Int.right;
+                grid = _selectedBoxGrid + Vector2Int.up + Vector2Int.right;
                 if (!IsOutSideBoard(grid) && IsEnemy(grid))
                     AddGrid();
 
                 //正常移動
-                grid = selectedBoxGrid + Vector2Int.up;
-                if (!IsEmpty(grid))
+                grid = _selectedBoxGrid + Vector2Int.up;
+                if (!IsOutSideBoard(grid) && !IsEmpty(grid))
                     break;
                 AddGrid();
 
                 //首次多移動一格
-                grid = selectedBoxGrid + Vector2Int.up * 2;
-                if (selectBoxGrid.y == 1 && IsEmpty(grid))
+                grid = _selectedBoxGrid + Vector2Int.up * 2;
+                if (_selectBoxGrid.y == 1 && IsEmpty(grid))
                     AddGrid();
                 break;
         }
 
         return possibleMoveGrids;
+    }
 
-
+    public void SetHotKeys(HotKeyControler.PlayerHotKeys playerHotKeys)
+    {
+        if (_playerType == PlayerType.White)
+        {
+            _up = playerHotKeys.white.up;
+            _down = playerHotKeys.white.down;
+            _left = playerHotKeys.white.left;
+            _right = playerHotKeys.white.right;
+            _confirm = playerHotKeys.white.confirm;
+            _cancel = playerHotKeys.white.cancel;
+            _backKing = playerHotKeys.white.backKing;
+        }
+        else if (_playerType == PlayerType.Black)
+        {
+            _up = playerHotKeys.black.up;
+            _down = playerHotKeys.black.down;
+            _left = playerHotKeys.black.left;
+            _right = playerHotKeys.black.right;
+            _confirm = playerHotKeys.black.confirm;
+            _cancel = playerHotKeys.black.cancel;
+            _backKing = playerHotKeys.black.backKing;
+        }
     }
 }
+
+public enum PlayerType { White = 1, Black = -1 }

@@ -17,7 +17,7 @@ public class BoardManager : MonoBehaviour
      */
     public bool[,] canCastling;
 
-    int[,] board;
+    int[,] _board;
     void Awake()
     {
         ResetBoard();
@@ -25,7 +25,7 @@ public class BoardManager : MonoBehaviour
 
     public void ResetBoard()
     {
-        board = new int[,]{
+        _board = new int[,]{
             { 5, 4, 3, 2, 1, 3, 4, 5 },
             { 6, 6 ,6, 6, 6, 6, 6, 6 },
             { 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -38,99 +38,113 @@ public class BoardManager : MonoBehaviour
         canCastling = new bool[,] { { true, true }, { true, true } };
     }
 
-    void unCastling(PlayerType player, int way)
+    void unCastling(PlayerType playerType, int way)
     {
-        if (player == PlayerType.white)
+        if (playerType == PlayerType.White)
             canCastling[0, way] = false;
-        else if (player == PlayerType.black)
+        else if (playerType == PlayerType.Black)
             canCastling[1, way] = false;
     }
 
-    void unCastling(PlayerType player)
+    void unCastlingAll(PlayerType playerType)
     {
-        if (player == PlayerType.white)
+        if (playerType == PlayerType.White)
         {
             canCastling[0, 0] = false;
             canCastling[0, 1] = false;
         }
-        else if (player == PlayerType.black)
+        else if (playerType == PlayerType.Black)
         {
             canCastling[1, 0] = false;
             canCastling[1, 1] = false;
         }
     }
 
-    public void MoveChess(PlayerType player, Vector2Int start, Vector2Int target)
+    public void MoveChess(PlayerType playerType, Vector2Int start, Vector2Int target)
     {
         //轉成白方方向
-        if (player == PlayerType.black)
+        if (playerType == PlayerType.Black)
         {
             start = Vector2Int.one * 7 - start;
             target = Vector2Int.one * 7 - target;
         }
 
         //移動
-        board[target.y, target.x] = board[start.y, start.x];
-        board[start.y, start.x] = 0;
+        _board[target.y, target.x] = _board[start.y, start.x];
+        _board[start.y, start.x] = 0;
 
         //兵升變
-        if (GetChessID(target) == (int)player * 6 && target.y == 7)
-            board[target.y, target.x] = (int)player * 2;
-
+        if (GetChessID(target) == (int)playerType * 6 &&
+            (target.y == 7 || target.y == 0)
+            )
+            _board[target.y, target.x] = (int)playerType * 2;
 
         #region 王車易位
         //國王移動判斷
-        if (GetChessID(target) == (int)player * 1)
-            unCastling(player);
+        if (GetChessID(target) == (int)playerType * 1)
+            unCastlingAll(playerType);
         //城堡移動判斷
-        if (GetChessID(target) == (int)player * 5)
+        if (GetChessID(target) == (int)playerType * 5)
         {
             if (start == new Vector2Int(0, 0)) //白左
-                unCastling(PlayerType.white, 0);
+                unCastling(PlayerType.White, 0);
             else if (start == new Vector2Int(7, 0)) //白右
-                unCastling(PlayerType.white, 1);
+                unCastling(PlayerType.White, 1);
             else if (start == new Vector2Int(7, 7)) //黑左
-                unCastling(PlayerType.black, 0);
+                unCastling(PlayerType.Black, 0);
             else if (start == new Vector2Int(0, 7)) //黑右
-                unCastling(PlayerType.black, 1);
+                unCastling(PlayerType.Black, 1);
         }
         //易位執行
-        if (GetChessID(target) == (int)player * 1 && Mathf.Abs(target.x - start.x) == 2)
+        if (GetChessID(target) == (int)playerType * 1 && Mathf.Abs(target.x - start.x) == 2)
         {
             if (target.x == 2) //左
             {
-                if (GetChessID(new Vector2Int(0, target.y)) != (int)player * 5)
+                if (GetChessID(new Vector2Int(0, target.y)) != (int)playerType * 5)
                     return;
-                board[target.y, 0] = 0;
-                board[target.y, target.x + 1] = (int)player * 5;
+                _board[target.y, 0] = 0;
+                _board[target.y, target.x + 1] = (int)playerType * 5;
             }
             if (target.x == 6) //右
             {
-                if (GetChessID(new Vector2Int(7, target.y)) != (int)player * 5)
+                if (GetChessID(new Vector2Int(7, target.y)) != (int)playerType * 5)
                     return;
-                board[target.y, 7] = 0;
-                board[target.y, target.x - 1] = (int)player * 5;
+                _board[target.y, 7] = 0;
+                _board[target.y, target.x - 1] = (int)playerType * 5;
             }
-            unCastling(player);
+            unCastlingAll(playerType);
         }
         #endregion
     }
 
-    public int[,] GetBoard(PlayerType player)
+    public int[,] GetBoard(PlayerType playerType)
     {
-        if (player == PlayerType.white)
-            return this.board;
+        if (playerType == PlayerType.White)
+            return this._board;
 
         var board = new int[8, 8];
 
         for (int i = 0; i < 8; i++)
             for (int j = 0; j < 8; j++)
-                board[7 - i, 7 - j] = this.board[i, j];
+                board[7 - i, 7 - j] = this._board[i, j];
 
         return board;
     }
 
-    public int GetChessID(PlayerType player, Vector2Int grid) => GetBoard(player)[grid.y, grid.x];
-    public int GetChessID(Vector2Int grid) => GetBoard(PlayerType.white)[grid.y, grid.x];
+    public int GetChessID(PlayerType playerTpye, Vector2Int grid) => GetBoard(playerTpye)[grid.y, grid.x];
 
+    public int GetChessID(Vector2Int grid) => GetBoard(PlayerType.White)[grid.y, grid.x];
+
+    public Vector2Int GetKingGrid(PlayerType playerType)
+    {
+        var board = GetBoard(playerType);
+        for (int y = 0; y < 8; y++)
+            for (int x = 0; x < 8; x++)
+            {
+                var chessGrid = new Vector2Int(y, x);
+                if (GetChessID(playerType, chessGrid) == (int)playerType * 1)
+                    return chessGrid;
+            }
+        return new Vector2Int(-1, -1);
+    }
 }

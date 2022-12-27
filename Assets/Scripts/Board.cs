@@ -27,10 +27,10 @@ public class Board : MonoBehaviour
         boardOffset +
         new Vector2(grid.x * gridSize.x, grid.y * gridSize.y);
 
-    public void DrawChesses(PlayerType player)
+    public void DrawChesses(PlayerType playerType)
     {
         ClearBoard();
-        var board = boardManager.GetBoard(player);
+        var board = boardManager.GetBoard(playerType);
         for (int y = 0; y < 8; y++)
         {
             for (int x = 0; x < 8; x++)
