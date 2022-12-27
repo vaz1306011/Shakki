@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class Controler : MonoBehaviour
 {
     [Header("ª±®a")]
@@ -55,6 +54,7 @@ public class Controler : MonoBehaviour
         _board.DrawChesses(_playerType);
         _selectedBox.SetActive(false);
         isSelect = false;
+        BackKing();
     }
 
     void Update()
@@ -90,11 +90,7 @@ public class Controler : MonoBehaviour
         UpdateSelectBox();
     }
 
-    void BackKing()
-    {
-        _selectBoxGrid = _boardManager.GetKingGrid(_playerType);
-        UpdateSelectBox();
-    }
+    
 
     void PlayerInput()
     {
@@ -304,6 +300,11 @@ public class Controler : MonoBehaviour
         }
 
         return possibleMoveGrids;
+    }
+    public void BackKing()
+    {
+        _selectBoxGrid = _boardManager.GetKingGrid(_playerType);
+        UpdateSelectBox();
     }
 
     public void SetHotKeys(HotKeyControler.PlayerHotKeys playerHotKeys)

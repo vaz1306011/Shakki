@@ -1,57 +1,53 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class UIControler : MonoBehaviour
 {
-    List<Canvas> _canvas = new List<Canvas>();
-    static bool _isEnabled;
+    static List<Canvas> _canvas = new List<Canvas>();
+    static Stack<Canvas> _UIstack = new Stack<Canvas>();
     public static bool IsEnabled
     {
-        get { return _isEnabled; }
+        get { return _UIstack.Count > 0; }
     }
 
     void Start()
     {
         foreach (Transform child in transform)
             _canvas.Add(child.GetComponent<Canvas>());
+        OpenUI("Menu");
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (_canvas.Find(canva => canva.enabled == true))
-                CloseAll();
+            if (IsEnabled)
+                BackUI();
             else
-                Open("Setting");
+                OpenUI("Pause");
         }
     }
 
-    public void Open(string name)
+    public void BackUI()
     {
-        foreach (var canva in _canvas)
-        {
-            if (canva.name == name)
-                canva.enabled = true;
-            else
-                canva.enabled = false;
-        }
-        _isEnabled = true;
+        _UIstack.Pop().enabled = false;
+        if (IsEnabled)
+            _UIstack.Peek().enabled = true;
     }
 
-    public void CloseAll()
+    public void OpenUI(string name)
     {
-        foreach (var canva in _canvas)
-            canva.enabled = false;
-        _isEnabled = false;
+
+        var canva = _canvas.Find(canva => canva.name == name);
+        canva.enabled = true;
+        if (IsEnabled)
+            _UIstack.Peek().enabled = false;
+        _UIstack.Push(canva);
     }
 
     public void CloseGame()
     {
         Application.Quit();
-        EditorApplication.isPlaying = false;
+        //EditorApplication.isPlaying = false;
     }
 }
