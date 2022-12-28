@@ -6,6 +6,7 @@ public class BackGround : MonoBehaviour
     [SerializeField] Vector2 _moveSpeed;
 
     RawImage _image;
+    Texture[] _chessSprite;
     float _rotateSpeed;
     float _roateInterval = 1.65f;
     float _time = 0;
@@ -13,6 +14,11 @@ public class BackGround : MonoBehaviour
     void Start()
     {
         _image = GetComponent<RawImage>();
+        _chessSprite = Resources.LoadAll<Texture>("Sprites/Chesses");
+        _rotateSpeed = Random.Range(-180, 180);
+
+        var index = Random.Range(0, _chessSprite.Length);
+        _image.texture = _chessSprite[index];
     }
 
     void Update()

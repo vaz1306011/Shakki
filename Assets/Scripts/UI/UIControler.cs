@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class UIControler : MonoBehaviour
 {
-    static List<Canvas> _canvas = new List<Canvas>();
+    static List<Canvas> _canvases = new List<Canvas>();
     static Stack<Canvas> _UIstack = new Stack<Canvas>();
     public static bool IsEnabled
     {
@@ -13,7 +13,7 @@ public class UIControler : MonoBehaviour
     void Start()
     {
         foreach (Transform child in transform)
-            _canvas.Add(child.GetComponent<Canvas>());
+            _canvases.Add(child.GetComponent<Canvas>());
         OpenUI("Menu");
     }
 
@@ -48,11 +48,11 @@ public class UIControler : MonoBehaviour
     public void OpenUI(string name)
     {
 
-        var canva = _canvas.Find(canva => canva.name == name);
-        canva.enabled = true;
+        var canvas = _canvases.Find(canvas => canvas.name == name);
+        canvas.enabled = true;
         //if (IsEnabled)
         //    _UIstack.Peek().enabled = false;
-        _UIstack.Push(canva);
+        _UIstack.Push(canvas);
     }
 
     public void CloseGame()
