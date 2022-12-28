@@ -35,14 +35,14 @@ public class HotKeyControler : MonoBehaviour
     void Start()
     {
         _playerHotKeys = JsonUtility.FromJson<PlayerHotKeys>(_hotKeyJson.text); //±qHotKey.jsonÅª¨ú§Ö±¶Áä
-        SetControlers();
+        //SetControlers();
     }
 
-    void SetControlers()
-    {
-        _player1Controler.SetHotKeys(_playerHotKeys);
-        _player2Controler.SetHotKeys(_playerHotKeys);
-    }
+    //void SetControlers()
+    //{
+    //    _player1Controler.SetHotKeys(_playerHotKeys);
+    //    _player2Controler.SetHotKeys(_playerHotKeys);
+    //}
 
     public void SetHotKey(PlayerType playerType, Operate operate, KeyCode key)
     {
@@ -94,7 +94,7 @@ public class HotKeyControler : MonoBehaviour
 
         var json = JsonUtility.ToJson(_playerHotKeys);
         File.WriteAllText(Application.dataPath + "/Scripts/HotKey.json", json);
-        SetControlers();
+        //SetControlers();
     }
 }
 

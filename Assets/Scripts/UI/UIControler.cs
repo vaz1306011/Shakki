@@ -3,8 +3,12 @@ using UnityEngine;
 
 public class UIControler : MonoBehaviour
 {
+    [SerializeField] Controler _player1Input;
+    [SerializeField] Controler _player2Input;
+
     static List<Canvas> _canvases = new List<Canvas>();
     static Stack<Canvas> _UIstack = new Stack<Canvas>();
+
     public static bool IsEnabled
     {
         get { return _UIstack.Count > 0; }
@@ -14,7 +18,8 @@ public class UIControler : MonoBehaviour
     {
         foreach (Transform child in transform)
             _canvases.Add(child.GetComponent<Canvas>());
-        OpenUI("Menu");
+
+        GoMenu();
     }
 
     void Update()
@@ -40,19 +45,31 @@ public class UIControler : MonoBehaviour
         OpenUI("Menu");
     }
 
+    void EnablePlayersInput()
+    {
+        _player1Input.EnableInput();
+        _player2Input.EnableInput();
+    }
+
+    void DisablePlayersInput()
+    {
+        _player1Input.DisableInput();
+        _player2Input.DisableInput();
+    }
+
     public void BackUI()
     {
         _UIstack.Pop().enabled = false;
+        if (_UIstack.Count == 0)
+            EnablePlayersInput();
     }
 
     public void OpenUI(string name)
     {
-
         var canvas = _canvases.Find(canvas => canvas.name == name);
         canvas.enabled = true;
-        //if (IsEnabled)
-        //    _UIstack.Peek().enabled = false;
         _UIstack.Push(canvas);
+        DisablePlayersInput();
     }
 
     public void CloseGame()

@@ -1,9 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Controler : MonoBehaviour
 {
+
     [Header("玩家")]
     [SerializeField] PlayerType _playerType;
 
@@ -15,17 +16,10 @@ public class Controler : MonoBehaviour
     [Header("棋盤")]
     [SerializeField] Board _board;
 
-    [Header("快捷鍵")]
-    [SerializeField] KeyCode _up;
-    [SerializeField] KeyCode _down;
-    [SerializeField] KeyCode _left;
-    [SerializeField] KeyCode _right;
-    [SerializeField] KeyCode _confirm;
-    [SerializeField] KeyCode _cancel;
-    [SerializeField] KeyCode _backKing;
-
     BoardManager _boardManager;
-    AudioSource _source;
+    PlayerInput _playerInput;
+    AudioSource _audioSource;
+
     Vector2Int _selectBoxGrid = Vector2Int.zero;
     Vector2Int _selectedBoxGrid;
     List<GameObject> _possibleMoveBoxsTemp = new List<GameObject>();
@@ -49,17 +43,22 @@ public class Controler : MonoBehaviour
 
     void Start()
     {
-        _source = GameObject.Find("SE").GetComponent<AudioSource>();
-        _boardManager = GetComponentInParent<BoardManager>();
-        _board.DrawChesses(_playerType);
         _selectedBox.SetActive(false);
+        _board.DrawChesses(_playerType);
+        _boardManager = GetComponentInParent<BoardManager>();
+        _playerInput = GetComponent<PlayerInput>();
+        _audioSource = GameObject.Find("SE").GetComponent<AudioSource>();
         isSelect = false;
         BackKing();
     }
 
     void Update()
     {
-        PlayerInput();
+        if (isSelect)
+            if (IsEnemy(_selectedBoxGrid))
+                isSelect = false;
+
+        _board.DrawChesses(_playerType);
     }
 
     int GetChessID(Vector2Int grid) => _boardManager.GetChessID(_playerType, grid);
@@ -74,9 +73,26 @@ public class Controler : MonoBehaviour
 
     void UpdateSelectBox() => _selectBox.transform.position = _board.TransformPosition(_selectBoxGrid);
 
-    void Move(Vector2Int direction)
+    void Move(Direction direction)
     {
-        _selectBoxGrid += direction;
+        switch (direction)
+        {
+            case Direction.Up:
+                _selectBoxGrid += Vector2Int.up;
+                break;
+
+            case Direction.Down:
+                _selectBoxGrid += Vector2Int.down;
+                break;
+
+            case Direction.Left:
+                _selectBoxGrid += Vector2Int.left;
+                break;
+
+            case Direction.Right:
+                _selectBoxGrid += Vector2Int.right;
+                break;
+        }
 
         if (_selectBoxGrid.x < 0)
             _selectBoxGrid.x = 0;
@@ -90,60 +106,89 @@ public class Controler : MonoBehaviour
         UpdateSelectBox();
     }
 
-    
-
-    void PlayerInput()
+    public void MoveUp(InputAction.CallbackContext ctx)
     {
-        if (UIControler.IsEnabled)
+        if (!ctx.started)
             return;
 
-        if (Input.GetKeyDown(_right))
-            Move(Vector2Int.right);
-        if (Input.GetKeyDown(_left))
-            Move(Vector2Int.left);
-        if (Input.GetKeyDown(_up))
-            Move(Vector2Int.up);
-        if (Input.GetKeyDown(_down))
-            Move(Vector2Int.down);
+        Move(Direction.Up);
+    }
 
-        if (Input.GetKeyDown(_confirm))
+    public void MoveDown(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.started)
+            return;
+
+        Move(Direction.Down);
+    }
+
+    public void MoveLeft(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.started)
+            return;
+
+        Move(Direction.Left);
+    }
+
+    public void MoveRight(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.started)
+            return;
+
+        Move(Direction.Right);
+    }
+
+    public void Confirm(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed)
+            return;
+
+        //選擇
+        if (!isSelect && IsAllies(_selectBoxGrid))
         {
-            //選擇
-            if (!isSelect && IsAllies(_selectBoxGrid))
+            _selectedBoxGrid = _selectBoxGrid;
+            _possibleMoveGrids = GetPossibleMoveGrids();
+            foreach (var grid in _possibleMoveGrids)
             {
-                _selectedBoxGrid = _selectBoxGrid;
-                _possibleMoveGrids = GetPossibleMoveGrids();
-                foreach (var grid in _possibleMoveGrids)
-                {
-                    var box = Instantiate(_possibleMoveBox, _board.TransformPosition(grid), Quaternion.identity);
-                    _possibleMoveBoxsTemp.Add(box);
-                }
-                isSelect = true;
-                _selectedBox.transform.position = _board.TransformPosition(_selectedBoxGrid);
-                _source.Play();
+                var box = Instantiate(_possibleMoveBox, _board.TransformPosition(grid), Quaternion.identity);
+                _possibleMoveBoxsTemp.Add(box);
             }
-            //確認
-            if (isSelect)
-            {
-                if (_possibleMoveGrids.Exists(grid => grid == _selectBoxGrid))
-                {
-                    _boardManager.MoveChess(_playerType, _selectedBoxGrid, _selectBoxGrid);
-                    isSelect = false;
-                }
-                _source.Play();
-            }
+            isSelect = true;
+            _selectedBox.transform.position = _board.TransformPosition(_selectedBoxGrid);
+            _audioSource.Play();
         }
-        if (Input.GetKeyDown(_cancel))
-            isSelect = false;
-
-        if (Input.GetKeyDown(_backKing))
-            BackKing();
-
+        //確認
         if (isSelect)
-            if (IsEnemy(_selectedBoxGrid))
+        {
+            if (_possibleMoveGrids.Exists(grid => grid == _selectBoxGrid))
+            {
+                _boardManager.MoveChess(_playerType, _selectedBoxGrid, _selectBoxGrid);
                 isSelect = false;
+            }
+            _audioSource.Play();
+        }
+    }
 
-        _board.DrawChesses(_playerType);
+    public void Cancel(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed)
+            return;
+
+        isSelect = false;
+    }
+
+    public void BackKing()
+    {
+        _selectBoxGrid = _boardManager.GetKingGrid(_playerType);
+        UpdateSelectBox();
+    }
+
+    public void BackKing(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.performed)
+            return;
+        _selectBoxGrid = _boardManager.GetKingGrid(_playerType);
+        UpdateSelectBox();
     }
 
     List<Vector2Int> GetPossibleMoveGrids()
@@ -301,35 +346,18 @@ public class Controler : MonoBehaviour
 
         return possibleMoveGrids;
     }
-    public void BackKing()
+
+    public void EnableInput()
     {
-        _selectBoxGrid = _boardManager.GetKingGrid(_playerType);
-        UpdateSelectBox();
+        _playerInput?.SwitchCurrentActionMap("Default");
     }
 
-    public void SetHotKeys(HotKeyControler.PlayerHotKeys playerHotKeys)
+    public void DisableInput()
     {
-        if (_playerType == PlayerType.White)
-        {
-            _up = playerHotKeys.white.up;
-            _down = playerHotKeys.white.down;
-            _left = playerHotKeys.white.left;
-            _right = playerHotKeys.white.right;
-            _confirm = playerHotKeys.white.confirm;
-            _cancel = playerHotKeys.white.cancel;
-            _backKing = playerHotKeys.white.backKing;
-        }
-        else if (_playerType == PlayerType.Black)
-        {
-            _up = playerHotKeys.black.up;
-            _down = playerHotKeys.black.down;
-            _left = playerHotKeys.black.left;
-            _right = playerHotKeys.black.right;
-            _confirm = playerHotKeys.black.confirm;
-            _cancel = playerHotKeys.black.cancel;
-            _backKing = playerHotKeys.black.backKing;
-        }
+        _playerInput?.SwitchCurrentActionMap("Disable");
     }
 }
 
 public enum PlayerType { White = 1, Black = -1 }
+
+public enum Direction { Up, Down, Left, Right }
