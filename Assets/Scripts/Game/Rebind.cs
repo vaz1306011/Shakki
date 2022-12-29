@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using UnityEngine.UI;
 
 public class Rebind : MonoBehaviour
 {
@@ -28,6 +29,7 @@ public class Rebind : MonoBehaviour
 
     public void Rebinding()
     {
+        _text.transform.parent.GetComponent<Image>().color = new Color(255, 140, 0, 255);
         _text.SetText("½Ð¿é¤J...");
         _ref.action.PerformInteractiveRebinding()
         .OnMatchWaitForAnother(.1f)

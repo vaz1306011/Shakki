@@ -17,9 +17,11 @@ public class Controler : MonoBehaviour
     [Header("棋盤")]
     [SerializeField] Board _board;
 
+    [Header("選取音效")]
+    [SerializeField] AudioSource _audioSource;
+
     BoardManager _boardManager;
     PlayerInput _playerInput;
-    AudioSource _audioSource;
 
     Vector2Int _selectBoxGrid = Vector2Int.zero;
     Vector2Int _selectedBoxGrid;
@@ -49,7 +51,6 @@ public class Controler : MonoBehaviour
         _boardManager = GetComponentInParent<BoardManager>();
         _playerInput = GetComponent<PlayerInput>();
         LoadBind();
-        _audioSource = GameObject.Find("SE").GetComponent<AudioSource>();
         isSelect = false;
         BackKing();
     }
@@ -157,7 +158,7 @@ public class Controler : MonoBehaviour
             }
             isSelect = true;
             _selectedBox.transform.position = _board.TransformPosition(_selectedBoxGrid);
-            _audioSource.Play();
+            _audioSource?.Play();
         }
         //確認
         if (isSelect)
@@ -167,7 +168,7 @@ public class Controler : MonoBehaviour
                 _boardManager.MoveChess(_playerType, _selectedBoxGrid, _selectBoxGrid);
                 isSelect = false;
             }
-            _audioSource.Play();
+            _audioSource?.Play();
         }
     }
 
