@@ -172,8 +172,30 @@
         {
             "name": "Pause",
             "id": "fd67837d-fbe7-4ef0-918c-e5a6e8bf6b5d",
-            "actions": [],
-            "bindings": []
+            "actions": [
+                {
+                    "name": "Back",
+                    "type": "Button",
+                    "id": "d7ae879f-3f5b-4c5d-bd41-22a44a65b4bb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "713ab32f-fdf6-489b-999d-838edfc74dcf",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Back",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

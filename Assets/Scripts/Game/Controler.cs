@@ -354,16 +354,31 @@ public class Controler : MonoBehaviour
         _playerInput?.SwitchCurrentActionMap(mapName);
     }
 
+    string BindPath => Application.persistentDataPath + $"/{_playerType.ToString()}Binding.json";
+
+    public void RestBind()
+    {
+        File.WriteAllText(BindPath, string.Empty);
+        GameObject.Find("UI").GetComponentInChildren<UpdateBinding>().UpdateBindings();
+    }
+
     public void SaveBind()
     {
         var json = _playerInput.actions.SaveBindingOverridesAsJson();
-        File.WriteAllText(Application.dataPath + $"/Scripts/Game/{_playerType.ToString()}Binding.json", json);
+        File.WriteAllText(BindPath, json);
     }
 
     public void LoadBind()
     {
-        var json = File.ReadAllText(Application.dataPath + $"/Scripts/Game/{_playerType.ToString()}Binding.json");
-        _playerInput.actions.LoadBindingOverridesFromJson(json);
+        try
+        {
+            var json = File.ReadAllText(BindPath);
+            _playerInput.actions.LoadBindingOverridesFromJson(json);
+        }
+        catch (FileNotFoundException)
+        {
+            RestBind();
+        }
     }
 }
 

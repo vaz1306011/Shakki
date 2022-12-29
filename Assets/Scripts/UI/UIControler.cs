@@ -23,20 +23,23 @@ public class UIControler : MonoBehaviour
         GoMenu();
     }
 
-    public void PauseOrBack(InputAction.CallbackContext ctx)
+    public void Pause(InputAction.CallbackContext ctx)
     {
         if (!ctx.started)
             return;
 
-        if (IsEnabled)
-        {
-            if (_UIstack.Peek().name == "Menu")
-                return;
+        OpenUI("Pause");
+    }
 
-            BackUI();
-        }
-        else
-            OpenUI("Pause");
+    public void Back(InputAction.CallbackContext ctx)
+    {
+        if (!ctx.started)
+            return;
+
+        if (_UIstack.Peek().name == "Menu")
+            return;
+
+        BackUI();
     }
 
     public void GoMenu()

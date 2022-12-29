@@ -30,6 +30,7 @@ public class Rebind : MonoBehaviour
     {
         _text.SetText("½Ð¿é¤J...");
         _ref.action.PerformInteractiveRebinding()
+        .OnMatchWaitForAnother(.1f)
         .WithCancelingThrough("<Keyboard>/escape")
         .OnComplete(bind)
         .OnCancel(bind)
