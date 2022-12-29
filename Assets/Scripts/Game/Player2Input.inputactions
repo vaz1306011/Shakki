@@ -150,7 +150,7 @@
             ]
         },
         {
-            "name": "Disable",
+            "name": "Pause",
             "id": "86adb425-f6be-4a2d-9bd1-fc9c5ced2638",
             "actions": [],
             "bindings": []

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -47,6 +48,7 @@ public class Controler : MonoBehaviour
         _board.DrawChesses(_playerType);
         _boardManager = GetComponentInParent<BoardManager>();
         _playerInput = GetComponent<PlayerInput>();
+        LoadBind();
         _audioSource = GameObject.Find("SE").GetComponent<AudioSource>();
         isSelect = false;
         BackKing();
@@ -347,14 +349,21 @@ public class Controler : MonoBehaviour
         return possibleMoveGrids;
     }
 
-    public void EnableInput()
+    public void SwitchInput(string mapName)
     {
-        _playerInput?.SwitchCurrentActionMap("Default");
+        _playerInput?.SwitchCurrentActionMap(mapName);
     }
 
-    public void DisableInput()
+    public void SaveBind()
     {
-        _playerInput?.SwitchCurrentActionMap("Disable");
+        var json = _playerInput.actions.SaveBindingOverridesAsJson();
+        File.WriteAllText(Application.dataPath + $"/Scripts/Game/{_playerType.ToString()}Binding.json", json);
+    }
+
+    public void LoadBind()
+    {
+        var json = File.ReadAllText(Application.dataPath + $"/Scripts/Game/{_playerType.ToString()}Binding.json");
+        _playerInput.actions.LoadBindingOverridesFromJson(json);
     }
 }
 

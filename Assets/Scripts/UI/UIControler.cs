@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class UIControler : MonoBehaviour
 {
@@ -22,46 +23,41 @@ public class UIControler : MonoBehaviour
         GoMenu();
     }
 
-    void Update()
+    public void PauseOrBack(InputAction.CallbackContext ctx)
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
+        if (!ctx.started)
+            return;
 
-            if (IsEnabled)
-            {
-                if (_UIstack.Peek().name == "Menu")
-                    return;
-                BackUI();
-            }
-            else
-                OpenUI("Pause");
+        if (IsEnabled)
+        {
+            if (_UIstack.Peek().name == "Menu")
+                return;
+
+            BackUI();
         }
+        else
+            OpenUI("Pause");
     }
 
     public void GoMenu()
     {
-        while (_UIstack.Count > 0)
-            BackUI();
+        foreach (var canvas in _canvases)
+            canvas.enabled = false;
+        _UIstack.Clear();
         OpenUI("Menu");
     }
 
-    void EnablePlayersInput()
+    void SwitchPlayersInput(string mapName)
     {
-        _player1Input.EnableInput();
-        _player2Input.EnableInput();
-    }
-
-    void DisablePlayersInput()
-    {
-        _player1Input.DisableInput();
-        _player2Input.DisableInput();
+        _player1Input.SwitchInput(mapName);
+        _player2Input.SwitchInput(mapName);
     }
 
     public void BackUI()
     {
         _UIstack.Pop().enabled = false;
         if (_UIstack.Count == 0)
-            EnablePlayersInput();
+            SwitchPlayersInput("Default");
     }
 
     public void OpenUI(string name)
@@ -69,7 +65,9 @@ public class UIControler : MonoBehaviour
         var canvas = _canvases.Find(canvas => canvas.name == name);
         canvas.enabled = true;
         _UIstack.Push(canvas);
-        DisablePlayersInput();
+        if (canvas.name == "Setting")
+            canvas.gameObject.GetComponent<UpdateBinding>().UpdateBindings();
+        SwitchPlayersInput("Pause");
     }
 
     public void CloseGame()
