@@ -17,8 +17,7 @@ public class BackGround : MonoBehaviour
         _chessSprite = Resources.LoadAll<Texture>("Sprites/Chesses");
         _rotateSpeed = Random.Range(-180, 180);
 
-        var index = Random.Range(0, _chessSprite.Length);
-        _image.texture = _chessSprite[index];
+        RandomChess();
     }
 
     void Update()
@@ -40,5 +39,11 @@ public class BackGround : MonoBehaviour
             _rotateSpeed = Random.Range(-180, 180);
         }
         _image.rectTransform.Rotate(new Vector3(0, 0, _rotateSpeed * Time.deltaTime));
+    }
+
+    public void RandomChess()
+    {
+        var index = Random.Range(0, _chessSprite.Length);
+        _image.texture = _chessSprite[index];
     }
 }

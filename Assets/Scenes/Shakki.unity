@@ -2578,7 +2578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67360b45f34ae5648943b2a9b43ef254, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: {x: 0.5, y: 0.5}
+  _moveSpeed: {x: 1, y: 1}
 --- !u!114 &341638707
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5240,7 +5240,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 892160633}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
@@ -5832,7 +5832,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131952929}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
@@ -6407,6 +6407,18 @@ MonoBehaviour:
           m_StringArgument: Menu
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 341638706}
+        m_TargetAssemblyTypeName: BackGround, Assembly-CSharp
+        m_MethodName: RandomChess
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1253738008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6540,7 +6552,7 @@ MonoBehaviour:
     m_Top: 250
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 0
+  m_Spacing: -150
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
