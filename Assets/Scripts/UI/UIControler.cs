@@ -4,8 +4,8 @@ using UnityEngine.InputSystem;
 
 public class UIControler : MonoBehaviour
 {
-    [SerializeField] Controler _player1Input;
-    [SerializeField] Controler _player2Input;
+    public Controler Player1Controler;
+    public Controler Player2Controler;
 
     static List<Canvas> _canvases = new List<Canvas>();
     static Stack<Canvas> _UIstack = new Stack<Canvas>();
@@ -23,7 +23,35 @@ public class UIControler : MonoBehaviour
         GoMenu();
     }
 
-    public void Pause(InputAction.CallbackContext ctx)
+    public void OpenUI(string name)
+    {
+        var canvas = _canvases.Find(canvas => canvas.name == name);
+        canvas.enabled = true;
+        _UIstack.Push(canvas);
+        if (canvas.name == "Setting")
+            canvas.gameObject.GetComponent<UpdateBinding>().UpdateBindings();
+        Player1Controler.SwitchInput("Pause");
+        Player2Controler.SwitchInput("Pause");
+    }
+
+    public void BackUI()
+    {
+        _UIstack.Pop().enabled = false;
+        if (_UIstack.Count == 0)
+        {
+            Player1Controler.SwitchInput("Default");
+            Player2Controler.SwitchInput("Default");
+        }
+    }
+
+    public void CloseAllUI()
+    {
+        foreach (var canvas in _canvases)
+            canvas.enabled = false;
+        _UIstack.Clear();
+    }
+
+    public void PauseUI(InputAction.CallbackContext ctx)
     {
         if (!ctx.started)
             return;
@@ -31,7 +59,7 @@ public class UIControler : MonoBehaviour
         OpenUI("Pause");
     }
 
-    public void Back(InputAction.CallbackContext ctx)
+    public void BackUI(InputAction.CallbackContext ctx)
     {
         if (!ctx.started)
             return;
@@ -44,38 +72,17 @@ public class UIControler : MonoBehaviour
 
     public void GoMenu()
     {
-        foreach (var canvas in _canvases)
-            canvas.enabled = false;
-        _UIstack.Clear();
+        CloseAllUI();
         OpenUI("Menu");
     }
 
-    void SwitchPlayersInput(string mapName)
+    public void GameOver(string winner)
     {
-        _player1Input.SwitchInput(mapName);
-        _player2Input.SwitchInput(mapName);
+        OpenUI("GameOver");
     }
 
-    public void BackUI()
-    {
-        _UIstack.Pop().enabled = false;
-        if (_UIstack.Count == 0)
-            SwitchPlayersInput("Default");
-    }
-
-    public void OpenUI(string name)
-    {
-        var canvas = _canvases.Find(canvas => canvas.name == name);
-        canvas.enabled = true;
-        _UIstack.Push(canvas);
-        if (canvas.name == "Setting")
-            canvas.gameObject.GetComponent<UpdateBinding>().UpdateBindings();
-        SwitchPlayersInput("Pause");
-    }
-
-    public void CloseGame()
+    public void QuitGame()
     {
         Application.Quit();
-        //EditorApplication.isPlaying = false;
     }
 }

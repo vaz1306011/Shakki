@@ -1,4 +1,9 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
+
+[Serializable] public class StringEvent : UnityEvent<string> { }
 
 public class BoardManager : MonoBehaviour
 {
@@ -14,6 +19,7 @@ public class BoardManager : MonoBehaviour
      * ¤h§L:6
      */
     public bool[,] canCastling;
+    [SerializeField] StringEvent GameOver;
 
     int[,] _board;
     void Awake()
@@ -34,6 +40,36 @@ public class BoardManager : MonoBehaviour
             { -5, -4, -3, -2, -1, -3, -4, -5 }
         };
         canCastling = new bool[,] { { true, true }, { true, true } };
+    }
+
+    PlayerType? GetWinner()
+    {
+        bool WhiteWin()
+        {
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                    if (_board[i, j] < 0)
+                        return false;
+
+            return true;
+        }
+
+        bool BlackWin()
+        {
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                    if (_board[i, j] < 0)
+                        return false;
+
+            return true;
+        }
+
+        if (WhiteWin())
+            return PlayerType.White;
+        else if (BlackWin())
+            return PlayerType.Black;
+
+        return null;
     }
 
     void unCastling(PlayerType playerType, int way)
@@ -70,6 +106,13 @@ public class BoardManager : MonoBehaviour
         //²¾°Ê
         _board[target.y, target.x] = _board[start.y, start.x];
         _board[start.y, start.x] = 0;
+
+        var winner = GetWinner();
+        if (winner != null)
+        {
+            GameOver.Invoke(winner.ToString());
+            return;
+        }
 
         //§L¤ÉÅÜ
         if (GetChessID(target) == (int)playerType * 6 &&
