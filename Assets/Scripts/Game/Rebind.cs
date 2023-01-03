@@ -11,7 +11,7 @@ public class Rebind : MonoBehaviour
     [SerializeField] InputActionReference _ref;
     [SerializeField] TextMeshProUGUI _text;
 
-    public void UpdateText()
+    public void RefreshText()
     {
         var p = _ref.action.bindings[0].effectivePath;
         var text = InputControlPath.ToHumanReadableString(p, InputControlPath.HumanReadableStringOptions.OmitDevice);
@@ -22,6 +22,7 @@ public class Rebind : MonoBehaviour
     {
         var p = operation.action.bindings[0].effectivePath;
         var text = InputControlPath.ToHumanReadableString(p, InputControlPath.HumanReadableStringOptions.OmitDevice);
+        _text.transform.parent.GetComponent<Image>().color = Color.white;
         _text.SetText(text);
         _playerControler.SaveBind();
         operation.Dispose();

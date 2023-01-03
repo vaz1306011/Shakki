@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -360,7 +361,7 @@ public class Controler : MonoBehaviour
     public void RestBind()
     {
         File.WriteAllText(BindPath, string.Empty);
-        GameObject.Find("UI").GetComponentInChildren<UpdateBinding>().UpdateBindings();
+        ReFreshBindingText();
     }
 
     public void SaveBind()
@@ -380,6 +381,15 @@ public class Controler : MonoBehaviour
         {
             RestBind();
         }
+    }
+
+    void ReFreshBindingText()
+    {
+        try
+        {
+            GameObject.Find("UI").GetComponentInChildren<UpdateBinding>().UpdateBindings();
+        }
+        catch (NullReferenceException) { }
     }
 }
 

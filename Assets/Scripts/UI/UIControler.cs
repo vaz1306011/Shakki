@@ -64,7 +64,7 @@ public class UIControler : MonoBehaviour
         if (!ctx.started)
             return;
 
-        if (_UIstack.Peek().name == "Menu")
+        if (_UIstack.Peek().name == "Menu" || _UIstack.Peek().name == "GameOver")
             return;
 
         BackUI();

@@ -19,6 +19,7 @@ public class BoardManager : MonoBehaviour
      * ¤h§L:6
      */
     public bool[,] canCastling;
+    public static bool KillKingWin = false;
     [SerializeField] StringEvent GameOver;
 
     int[,] _board;
@@ -42,31 +43,49 @@ public class BoardManager : MonoBehaviour
         canCastling = new bool[,] { { true, true }, { true, true } };
     }
 
-    PlayerType? GetWinner()
+    PlayerType? GetWinner(bool killKingWin)
     {
-        bool WhiteWin()
+        bool IsWhiteWin()
         {
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
-                    if (_board[i, j] < 0)
-                        return false;
+                {
+                    if (killKingWin)
+                    {
+                        if (_board[i, j] == -1)
+                            return false;
+                    }
+                    else
+                    {
+                        if (_board[i, j] < 0)
+                            return false;
+                    }
+                }
 
             return true;
         }
 
-        bool BlackWin()
+        bool IsBlackWin()
         {
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
-                    if (_board[i, j] < 0)
-                        return false;
+                    if (killKingWin)
+                    {
+                        if (_board[i, j] == 1)
+                            return false;
+                    }
+                    else
+                    {
+                        if (_board[i, j] > 0)
+                            return false;
+                    }
 
             return true;
         }
 
-        if (WhiteWin())
+        if (IsWhiteWin())
             return PlayerType.White;
-        else if (BlackWin())
+        else if (IsBlackWin())
             return PlayerType.Black;
 
         return null;
@@ -107,7 +126,7 @@ public class BoardManager : MonoBehaviour
         _board[target.y, target.x] = _board[start.y, start.x];
         _board[start.y, start.x] = 0;
 
-        var winner = GetWinner();
+        var winner = GetWinner(KillKingWin);
         if (winner != null)
         {
             GameOver.Invoke(winner.ToString());
