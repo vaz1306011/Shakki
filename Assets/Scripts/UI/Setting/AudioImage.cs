@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class AudioImage : MonoBehaviour
 {
     [SerializeField] AudioSource _audioSource;
-    [SerializeField] Sprite _unMute;
+    [SerializeField] Sprite _Unmute;
     [SerializeField] Sprite _mute;
 
     Image _image;
@@ -24,7 +24,7 @@ public class AudioImage : MonoBehaviour
         }
         else
         {
-            _image.sprite = _unMute;
+            _image.sprite = _Unmute;
 
         }
     }

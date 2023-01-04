@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class UIControler : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class UIControler : MonoBehaviour
 
         GoMenu();
     }
+
+    Canvas TopCanvas => _UIstack.Peek();
 
     public void OpenUI(string name)
     {
@@ -79,6 +82,7 @@ public class UIControler : MonoBehaviour
     public void GameOver(string winner)
     {
         OpenUI("GameOver");
+        TopCanvas.transform.GetChild(0).GetComponent<GameOverImage>().SetImage(winner);
     }
 
     public void QuitGame()
