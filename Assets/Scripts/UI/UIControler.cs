@@ -33,8 +33,8 @@ public class UIControler : MonoBehaviour
         _UIstack.Push(canvas);
         if (canvas.name == "Setting")
             canvas.gameObject.GetComponent<UpdateBinding>().UpdateBindings();
-        Player1Controler.SwitchInput("Pause");
-        Player2Controler.SwitchInput("Pause");
+        Player1Controler.SetInputMap("Pause");
+        Player2Controler.SetInputMap("Pause");
     }
 
     public void BackUI()
@@ -42,8 +42,8 @@ public class UIControler : MonoBehaviour
         _UIstack.Pop().enabled = false;
         if (_UIstack.Count == 0)
         {
-            Player1Controler.SwitchInput("Default");
-            Player2Controler.SwitchInput("Default");
+            Player1Controler.SetInputMap("Default");
+            Player2Controler.SetInputMap("Default");
         }
     }
 

@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 7244515}
   - component: {fileID: 7244514}
   m_Layer: 0
-  m_Name: Reset Board
+  m_Name: Play Again
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1963,6 +1963,118 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 803724ac-ac35-4fd1-941e-80d1a6eecb9a
     m_ActionName: Default/BackKing[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 212393698}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: MoveUp
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: c7309ab3-c3f2-456f-8e7b-34740a7a9a83
+    m_ActionName: Reverse/Up[/Keyboard/downArrow]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 212393698}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: MoveDown
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 281c7ef8-5e0c-4639-9272-61cdcd7dcd8d
+    m_ActionName: Reverse/Down[/Keyboard/upArrow]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 212393698}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: MoveLeft
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 1b006014-0a1a-4e85-b5d2-5bcf96ed87d1
+    m_ActionName: Reverse/Left[/Keyboard/rightArrow]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 212393698}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: MoveRight
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 1c4d309f-7832-48da-bbec-c171520e6819
+    m_ActionName: Reverse/Right[/Keyboard/leftArrow]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 212393698}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: Confirm
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: fed7f71a-6cc4-47c9-b8c1-4b8b78cd27e7
+    m_ActionName: Reverse/Confirm[/Keyboard/numpad0]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 212393698}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: Cancel
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 27460667-1b39-47de-9a22-3f4b142c105f
+    m_ActionName: Reverse/Cancel[/Keyboard/numpad1]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 212393698}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: BackKing
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: b52133e1-7778-4062-86e5-a9c2329bdf16
+    m_ActionName: Reverse/BackKing[/Keyboard/numpad2]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Pause
@@ -3228,6 +3340,42 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1319259074}
+        m_TargetAssemblyTypeName: BoardManager, Assembly-CSharp
+        m_MethodName: ResetBoard
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1315569702}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: BackKing
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 212393698}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: BackKing
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &427229670
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3844,6 +3992,10 @@ PrefabInstance:
     - target: {fileID: 6748406429630278469, guid: dca02982daa367e4791c7c9a890fa21e, type: 3}
       propertyPath: m_Name
       value: SelectedBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 6748406429630278469, guid: dca02982daa367e4791c7c9a890fa21e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -6517,6 +6669,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SelectedBox
       objectReference: {fileID: 0}
+    - target: {fileID: 6748406429630278469, guid: dca02982daa367e4791c7c9a890fa21e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: dca02982daa367e4791c7c9a890fa21e, type: 3}
@@ -7662,6 +7818,134 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: d7ae879f-3f5b-4c5d-bd41-22a44a65b4bb
     m_ActionName: Pause/Pause[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1315569702}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: MoveUp
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 5ea118f1-9e0f-4889-8a95-9e58b789bb8f
+    m_ActionName: Reverse/Up
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1315569702}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: MoveDown
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 45609817-da6e-4e3e-a5dc-a515531ef1b0
+    m_ActionName: Reverse/Down
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1315569702}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: MoveLeft
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 67430024-349f-470d-8ef1-0d129f0fdb60
+    m_ActionName: Reverse/Left
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1315569702}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: MoveRight
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 7acb5ed3-1c82-433a-b5ad-d0a56617c6eb
+    m_ActionName: Reverse/Right
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1315569702}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: Confirm
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 372ea246-bbda-4431-9bab-189d4ba6b809
+    m_ActionName: Reverse/Confirm
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1315569702}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: Cancel
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 5c1043a8-bc02-43e2-9af9-eb4c18008390
+    m_ActionName: Reverse/Cancel
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1315569702}
+        m_TargetAssemblyTypeName: Controler, Assembly-CSharp
+        m_MethodName: BackKing
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: af5cf54a-34c4-4e1d-ae09-018a155c94aa
+    m_ActionName: Reverse/BackKing
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 751669278}
+        m_TargetAssemblyTypeName: UIControler, Assembly-CSharp
+        m_MethodName: PauseUI
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: d7eeaea8-86be-469c-b7c2-cc6d220ed59c
+    m_ActionName: Reverse/Pause
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Pause
@@ -7848,6 +8132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4dd2f837f4ae03438f13c90e6b83b99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  effectBox: {fileID: 5833257363735888988, guid: 5b6294619294fce4ca47a76827403199, type: 3}
   GameOver:
     m_PersistentCalls:
       m_Calls:

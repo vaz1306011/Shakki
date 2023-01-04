@@ -17,15 +17,50 @@ public class BoardManager : MonoBehaviour
      * 騎士:4
      * 城堡:5
      * 士兵:6
+     * 效果格:7
      */
-    public bool[,] canCastling;
+    public bool[,] CanCastling;
     public static bool KillKingWin = false;
+    [SerializeField] GameObject effectBox;
     [SerializeField] StringEvent GameOver;
 
+
+    Controler p1Controler, p2Controler;
     int[,] _board;
+
+    Vector2Int _effectGrid;
+    float _nextEffectTime;
+
+
     void Awake()
     {
         ResetBoard();
+    }
+
+    void Start()
+    {
+        p1Controler = transform.Find("Player1/Controler").GetComponent<Controler>();
+        p2Controler = transform.Find("Player2/Controler").GetComponent<Controler>();
+        _nextEffectTime = 1;
+    }
+
+    void Update()
+    {
+        if (_nextEffectTime > 0)
+        {
+            _nextEffectTime -= Time.deltaTime;
+            if (_nextEffectTime <= 0)
+            {
+                while (true)
+                {
+                    var x = UnityEngine.Random.Range(0, 8);
+                    var y = UnityEngine.Random.Range(0, 8);
+                    if (SetEffecGrid(new Vector2Int(x, y)))
+                        break;
+                }
+                _nextEffectTime = UnityEngine.Random.Range(2f, 5f);
+            }
+        }
     }
 
     public void ResetBoard()
@@ -40,17 +75,17 @@ public class BoardManager : MonoBehaviour
             { -6, -6 ,-6, -6, -6, -6, -6, -6 },
             { -5, -4, -3, -2, -1, -3, -4, -5 }
         };
-        canCastling = new bool[,] { { true, true }, { true, true } };
+        CanCastling = new bool[,] { { true, true }, { true, true } };
     }
 
-    PlayerType? GetWinner(bool killKingWin)
+    PlayerType? GetWinner()
     {
         bool IsWhiteWin()
         {
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
                 {
-                    if (killKingWin)
+                    if (KillKingWin)
                     {
                         if (_board[i, j] == -1)
                             return false;
@@ -69,7 +104,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
-                    if (killKingWin)
+                    if (KillKingWin)
                     {
                         if (_board[i, j] == 1)
                             return false;
@@ -94,26 +129,26 @@ public class BoardManager : MonoBehaviour
     void unCastling(PlayerType playerType, int way)
     {
         if (playerType == PlayerType.White)
-            canCastling[0, way] = false;
+            CanCastling[0, way] = false;
         else if (playerType == PlayerType.Black)
-            canCastling[1, way] = false;
+            CanCastling[1, way] = false;
     }
 
     void unCastlingAll(PlayerType playerType)
     {
         if (playerType == PlayerType.White)
         {
-            canCastling[0, 0] = false;
-            canCastling[0, 1] = false;
+            CanCastling[0, 0] = false;
+            CanCastling[0, 1] = false;
         }
         else if (playerType == PlayerType.Black)
         {
-            canCastling[1, 0] = false;
-            canCastling[1, 1] = false;
+            CanCastling[1, 0] = false;
+            CanCastling[1, 1] = false;
         }
     }
 
-    public void MoveChess(PlayerType playerType, Vector2Int start, Vector2Int target)
+    public void MoveChess(Vector2Int start, Vector2Int target, PlayerType playerType)
     {
         //轉成白方方向
         if (playerType == PlayerType.Black)
@@ -122,11 +157,26 @@ public class BoardManager : MonoBehaviour
             target = Vector2Int.one * 7 - target;
         }
 
+        //特殊格
+        if (GetChessID(target) == 7)
+        {
+            if (playerType == PlayerType.White)
+            {
+                p2Controler.SetInputMap("Reverse");
+                p2Controler.ReverseTime = UnityEngine.Random.Range(5f, 10f);
+            }
+            else if (playerType == PlayerType.Black)
+            {
+                p1Controler.SetInputMap("Reverse");
+                p1Controler.ReverseTime = UnityEngine.Random.Range(5f, 10f);
+            };
+        }
+
         //移動
         _board[target.y, target.x] = _board[start.y, start.x];
         _board[start.y, start.x] = 0;
 
-        var winner = GetWinner(KillKingWin);
+        var winner = GetWinner();
         if (winner != null)
         {
             GameOver.Invoke(winner.ToString());
@@ -191,9 +241,9 @@ public class BoardManager : MonoBehaviour
         return board;
     }
 
-    public int GetChessID(PlayerType playerTpye, Vector2Int grid) => GetBoard(playerTpye)[grid.y, grid.x];
+    public int GetChessID(Vector2Int grid, PlayerType playerTpye = PlayerType.White) => GetBoard(playerTpye)[grid.y, grid.x];
 
-    public int GetChessID(Vector2Int grid) => GetBoard(PlayerType.White)[grid.y, grid.x];
+    public Vector2Int TrasformOtherSideGrid(Vector2Int grid) => new Vector2Int(7 - grid.x, 7 - grid.y);
 
     public Vector2Int GetKingGrid(PlayerType playerType)
     {
@@ -202,9 +252,18 @@ public class BoardManager : MonoBehaviour
             for (int x = 0; x < 8; x++)
             {
                 var chessGrid = new Vector2Int(y, x);
-                if (GetChessID(playerType, chessGrid) == (int)playerType * 1)
+                if (GetChessID(chessGrid, playerType) == (int)playerType * 1)
                     return chessGrid;
             }
         return new Vector2Int(-1, -1);
+    }
+
+    public bool SetEffecGrid(Vector2Int grid)
+    {
+        if (GetChessID(grid) != 0)
+            return false;
+
+        _board[grid.y, grid.x] = 7;
+        return true;
     }
 }

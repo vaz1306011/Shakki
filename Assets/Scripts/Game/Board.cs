@@ -7,14 +7,14 @@ public class Board : MonoBehaviour
     public Vector2 gridSize;
 
     BoardManager boardManager;
-    Dictionary<int, string> chessDic =
+    Dictionary<int, string> _chessDic =
         new Dictionary<int, string>()
         {
             {1,"KingW"},{2,"QueenW"},{3,"BishopW"},{4,"KnightW"},{5,"RookW"},{6,"PawnW"},
-            {-1,"KingB"},{-2,"QueenB"},{-3,"BishopB"},{-4,"KnightB"},{-5,"RookB"},{-6,"PawnB"}
+            {-1,"KingB"},{-2,"QueenB"},{-3,"BishopB"},{-4,"KnightB"},{-5,"RookB"},{-6,"PawnB"},
+            {7,"EffectBox"}
         };
-    List<GameObject> chessTemp = new List<GameObject>();
-
+    List<GameObject> _chessTemp = new List<GameObject>();
 
     void Awake()
     {
@@ -26,7 +26,13 @@ public class Board : MonoBehaviour
         boardOffset +
         new Vector2(grid.x * gridSize.x, grid.y * gridSize.y);
 
-    public void DrawChesses(PlayerType playerType)
+
+    GameObject DrawGameObject(GameObject prefab, Vector2Int grid)
+    {
+        return Instantiate(prefab, TransformPosition(grid), Quaternion.identity);
+    }
+
+    public void DrawBoard(PlayerType playerType)
     {
         ClearBoard();
         var board = boardManager.GetBoard(playerType);
@@ -37,11 +43,9 @@ public class Board : MonoBehaviour
                 var chessID = board[y, x];
                 if (chessID != 0)
                 {
-                    var chessPrefab = Resources.Load<GameObject>($"Chesses/{chessDic[chessID]}");
-                    var position = TransformPosition(new Vector2Int(x, y));
-                    var rotation = Quaternion.identity;
-                    var chess = Instantiate(chessPrefab, position, rotation);
-                    chessTemp.Add(chess);
+                    var chessPrefab = Resources.Load<GameObject>($"Chesses/{_chessDic[chessID]}");
+                    var chess = DrawGameObject(chessPrefab, new Vector2Int(x, y));
+                    _chessTemp.Add(chess);
                 }
             }
         }
@@ -49,8 +53,8 @@ public class Board : MonoBehaviour
 
     public void ClearBoard()
     {
-        foreach (var ct in chessTemp)
+        foreach (var ct in _chessTemp)
             Destroy(ct);
-        chessTemp.Clear();
+        _chessTemp.Clear();
     }
 }

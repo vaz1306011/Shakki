@@ -21,6 +21,7 @@ public class Controler : MonoBehaviour
     [Header("選取音效")]
     [SerializeField] AudioSource _audioSource;
 
+    public float ReverseTime = 0;
     BoardManager _boardManager;
     PlayerInput _playerInput;
 
@@ -48,7 +49,7 @@ public class Controler : MonoBehaviour
     void Start()
     {
         _selectedBox.SetActive(false);
-        _board.DrawChesses(_playerType);
+        _board.DrawBoard(_playerType);
         _boardManager = GetComponentInParent<BoardManager>();
         _playerInput = GetComponent<PlayerInput>();
         LoadBind();
@@ -62,18 +63,44 @@ public class Controler : MonoBehaviour
             if (IsEnemy(_selectedBoxGrid))
                 isSelect = false;
 
-        _board.DrawChesses(_playerType);
+        _board.DrawBoard(_playerType);
+
+        if (ReverseTime > 0)
+        {
+            ReverseTime -= Time.deltaTime;
+            if (ReverseTime <= 0)
+                SetInputMap("Default");
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            SetInputMap("Reverse");
+        }
+        else if (Input.GetKeyDown(KeyCode.X))
+        {
+            SetInputMap("Default");
+        }
     }
 
-    int GetChessID(Vector2Int grid) => _boardManager.GetChessID(_playerType, grid);
+    int GetChessID(Vector2Int grid) => _boardManager.GetChessID(grid, _playerType);
 
     bool IsOutSideBoard(Vector2Int grid) => grid.x < 0 || grid.y < 0 || grid.x > 7 || grid.y > 7;
 
-    bool IsEnemy(Vector2Int grid) => _playerType == PlayerType.White ? GetChessID(grid) < 0 : GetChessID(grid) > 0;
+    bool IsEnemy(Vector2Int grid)
+    {
+        if (GetChessID(grid) == 7)
+            return false;
+        return _playerType == PlayerType.White ? GetChessID(grid) < 0 : GetChessID(grid) > 0;
+    }
 
-    bool IsAllies(Vector2Int grid) => _playerType == PlayerType.White ? GetChessID(grid) > 0 : GetChessID(grid) < 0;
+    bool IsAllies(Vector2Int grid)
+    {
+        if (GetChessID(grid) == 7)
+            return false;
+        return _playerType == PlayerType.White ? GetChessID(grid) > 0 : GetChessID(grid) < 0;
+    }
 
-    bool IsEmpty(Vector2Int grid) => GetChessID(grid) == 0;
+    bool IsEmpty(Vector2Int grid) => GetChessID(grid) == 0 || GetChessID(grid) == 7;
 
     void UpdateSelectBox() => _selectBox.transform.position = _board.TransformPosition(_selectBoxGrid);
 
@@ -162,11 +189,11 @@ public class Controler : MonoBehaviour
             _audioSource?.Play();
         }
         //確認
-        if (isSelect)
+        else if (isSelect)
         {
             if (_possibleMoveGrids.Exists(grid => grid == _selectBoxGrid))
             {
-                _boardManager.MoveChess(_playerType, _selectedBoxGrid, _selectBoxGrid);
+                _boardManager.MoveChess(_selectedBoxGrid, _selectBoxGrid, _playerType);
                 isSelect = false;
             }
             _audioSource?.Play();
@@ -223,12 +250,12 @@ public class Controler : MonoBehaviour
         {
             if (_playerType == PlayerType.White)
             {
-                if (!_boardManager.canCastling[0, way == -1 ? 0 : 1])
+                if (!_boardManager.CanCastling[0, way == -1 ? 0 : 1])
                     return;
             }
             else if (_playerType == PlayerType.Black)
             {
-                if (!_boardManager.canCastling[1, way == -1 ? 0 : 1])
+                if (!_boardManager.CanCastling[1, way == -1 ? 0 : 1])
                     return;
             }
 
@@ -326,12 +353,12 @@ public class Controler : MonoBehaviour
             case 6:
             case -6:
                 //左前敵人
-                grid = _selectedBoxGrid + Vector2Int.up + Vector2Int.left;
+                grid = _selectedBoxGrid + new Vector2Int(-1, 1);
                 if (!IsOutSideBoard(grid) && IsEnemy(grid))
                     AddGrid();
 
                 //右前敵人
-                grid = _selectedBoxGrid + Vector2Int.up + Vector2Int.right;
+                grid = _selectedBoxGrid + new Vector2Int(1, 1);
                 if (!IsOutSideBoard(grid) && IsEnemy(grid))
                     AddGrid();
 
@@ -351,8 +378,13 @@ public class Controler : MonoBehaviour
         return possibleMoveGrids;
     }
 
-    public void SwitchInput(string mapName)
+    public void SetInputMap(string mapName)
     {
+        if (mapName == "Reverse")
+        {
+            UpdaeReverseInput();
+        }
+
         _playerInput?.SwitchCurrentActionMap(mapName);
     }
 
@@ -361,7 +393,11 @@ public class Controler : MonoBehaviour
     public void RestBind()
     {
         File.WriteAllText(BindPath, string.Empty);
-        ReFreshBindingText();
+        try
+        {
+            GameObject.Find("UI").GetComponentInChildren<UpdateBinding>().UpdateBindings();
+        }
+        catch (NullReferenceException) { }
     }
 
     public void SaveBind()
@@ -383,13 +419,35 @@ public class Controler : MonoBehaviour
         }
     }
 
-    void ReFreshBindingText()
+    public void UpdaeReverseInput()
     {
-        try
+        void SetBinding(InputAction a, InputAction b)
         {
-            GameObject.Find("UI").GetComponentInChildren<UpdateBinding>().UpdateBindings();
+            a.ApplyBindingOverride(b.bindings[0].path);
         }
-        catch (NullReferenceException) { }
+        var dUp = _playerInput.actions["Default/Up"];
+        var dDown = _playerInput.actions["Default/Down"];
+        var dLeft = _playerInput.actions["Default/Left"];
+        var dRight = _playerInput.actions["Default/Right"];
+        var dConfirm = _playerInput.actions["Default/Confirm"];
+        var dCancel = _playerInput.actions["Default/Cancel"];
+        var dBackking = _playerInput.actions["Default/BackKing"];
+
+        var rUp = _playerInput.actions["Reverse/Up"];
+        var rDown = _playerInput.actions["Reverse/Down"];
+        var rLeft = _playerInput.actions["Reverse/Left"];
+        var rRight = _playerInput.actions["Reverse/Right"];
+        var rConfirm = _playerInput.actions["Reverse/Confirm"];
+        var rCancel = _playerInput.actions["Reverse/Cancel"];
+        var rBackking = _playerInput.actions["Reverse/BackKing"];
+
+        SetBinding(rUp, dDown);
+        SetBinding(rDown, dUp);
+        SetBinding(rLeft, dRight);
+        SetBinding(rRight, dLeft);
+        SetBinding(rConfirm, dBackking);
+        SetBinding(rCancel, dConfirm);
+        SetBinding(rBackking, dCancel);
     }
 }
 
