@@ -19,18 +19,31 @@ public class BoardManager : MonoBehaviour
      * 士兵:6
      * 效果格:7
      */
-    public bool[,] CanCastling;
-    public static bool KillKingWin = false;
     [SerializeField] GameObject effectBox;
     [SerializeField] StringEvent GameOver;
 
+    public bool[,] CanCastling;
+    public static bool KillKingWin = false;
 
     Controler p1Controler, p2Controler;
     int[,] _board;
 
     Vector2Int _effectGrid;
-    float _nextEffectTime;
-
+    static float _nextEffectTime = 1;
+    public static bool IsEffectGridEnable
+    {
+        get
+        {
+            return _nextEffectTime > 0;
+        }
+        set
+        {
+            if (value)
+                _nextEffectTime = 1;
+            else
+                _nextEffectTime = 0;
+        }
+    }
 
     void Awake()
     {
@@ -41,7 +54,6 @@ public class BoardManager : MonoBehaviour
     {
         p1Controler = transform.Find("Player1/Controler").GetComponent<Controler>();
         p2Controler = transform.Find("Player2/Controler").GetComponent<Controler>();
-        _nextEffectTime = 1;
     }
 
     void Update()
@@ -51,7 +63,16 @@ public class BoardManager : MonoBehaviour
             _nextEffectTime -= Time.deltaTime;
             if (_nextEffectTime <= 0)
             {
-                while (true)
+                bool hasEffectGrid = false;
+                for (int i = 0; i < 8; i++)
+                    for (int j = 0; j < 8; j++)
+                        if (GetChessID(new Vector2Int(i, j)) == 7)
+                        {
+                            hasEffectGrid = true;
+                            break;
+                        }
+
+                while (!hasEffectGrid)
                 {
                     var x = UnityEngine.Random.Range(0, 8);
                     var y = UnityEngine.Random.Range(0, 8);
@@ -173,8 +194,8 @@ public class BoardManager : MonoBehaviour
         }
 
         //移動
-        _board[target.y, target.x] = _board[start.y, start.x];
-        _board[start.y, start.x] = 0;
+        SetChess(GetChessID(start), target);
+        SetChess(0, start);
 
         var winner = GetWinner();
         if (winner != null)
@@ -187,7 +208,7 @@ public class BoardManager : MonoBehaviour
         if (GetChessID(target) == (int)playerType * 6 &&
             (target.y == 7 || target.y == 0)
             )
-            _board[target.y, target.x] = (int)playerType * 2;
+            SetChess((int)playerType * 2, target);
 
         #region 王車易位
         //國王移動判斷
@@ -212,15 +233,15 @@ public class BoardManager : MonoBehaviour
             {
                 if (GetChessID(new Vector2Int(0, target.y)) != (int)playerType * 5)
                     return;
-                _board[target.y, 0] = 0;
-                _board[target.y, target.x + 1] = (int)playerType * 5;
+                SetChess(0, 0, target.y);
+                SetChess((int)playerType * 5, target.x + 1, target.y);
             }
             if (target.x == 6) //右
             {
                 if (GetChessID(new Vector2Int(7, target.y)) != (int)playerType * 5)
                     return;
-                _board[target.y, 7] = 0;
-                _board[target.y, target.x - 1] = (int)playerType * 5;
+                SetChess(0, 7, target.y);
+                SetChess((int)playerType * 5, target.x - 1, target.y);
             }
             unCastlingAll(playerType);
         }
@@ -243,7 +264,27 @@ public class BoardManager : MonoBehaviour
 
     public int GetChessID(Vector2Int grid, PlayerType playerTpye = PlayerType.White) => GetBoard(playerTpye)[grid.y, grid.x];
 
-    public Vector2Int TrasformOtherSideGrid(Vector2Int grid) => new Vector2Int(7 - grid.x, 7 - grid.y);
+    void SetChess(int chessID, Vector2Int grid)
+    {
+        if (chessID < -6 || 7 < chessID)
+            return;
+
+        if (grid.x < 0 || 7 < grid.x || grid.y < 0 || 7 < grid.y)
+            return;
+
+        _board[grid.y, grid.x] = chessID;
+    }
+
+    void SetChess(int chessID, int x, int y)
+    {
+        if (chessID < -6 || 7 < chessID)
+            return;
+
+        if (x < 0 || 7 < x || y < 0 || 7 < y)
+            return;
+
+        _board[y, x] = chessID;
+    }
 
     public Vector2Int GetKingGrid(PlayerType playerType)
     {
@@ -263,7 +304,23 @@ public class BoardManager : MonoBehaviour
         if (GetChessID(grid) != 0)
             return false;
 
-        _board[grid.y, grid.x] = 7;
+        SetChess(7, grid);
         return true;
     }
+
+    public void SwitchEffectGrid()
+    {
+        IsEffectGridEnable = !IsEffectGridEnable;
+        if (!IsEffectGridEnable)
+        {
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                {
+                    var grid = new Vector2Int(i, j);
+                    if (GetChessID(grid) == 7)
+                        SetChess(0, grid);
+                }
+        }
+    }
+
 }

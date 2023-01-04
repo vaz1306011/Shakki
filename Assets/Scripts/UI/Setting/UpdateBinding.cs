@@ -6,12 +6,12 @@ using UnityEngine.UI;
 
 public class UpdateBinding : MonoBehaviour
 {
-    [SerializeField] UnityEvent _loadBind;
+    [SerializeField] UnityEvent loadBind;
     [SerializeField] Slider BGMSlider, SESlider;
 
     public void UpdateBindings()
     {
-        _loadBind.Invoke();
+        loadBind.Invoke();
         foreach (var rebind in GetComponentsInChildren<Rebind>())
             rebind.RefreshText();
         BGMSlider.value = GameSetting.setting.BGMVolume;

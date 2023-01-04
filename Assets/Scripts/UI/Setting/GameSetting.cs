@@ -14,16 +14,18 @@ public class GameSetting : MonoBehaviour
     {
         public Setting(AudioSource BGM, AudioSource SE)
         {
-            this.BGMVolume = BGM.volume;
-            this.SEVolume = SE.volume;
-            this.BGMMute = BGM.mute;
-            this.SEMute = SE.mute;
+            BGMVolume = BGM.volume;
+            SEVolume = SE.volume;
+            BGMMute = BGM.mute;
+            SEMute = SE.mute;
             KillKingWin = BoardManager.KillKingWin;
+            IsEffectGridEnable = BoardManager.IsEffectGridEnable;
         }
 
         public float BGMVolume, SEVolume;
         public bool BGMMute, SEMute;
         public bool KillKingWin;
+        public bool IsEffectGridEnable;
     }
 
     string SettingPath => Application.persistentDataPath + $"/GameSetting.json";
@@ -56,5 +58,6 @@ public class GameSetting : MonoBehaviour
         BGM.mute = setting.BGMMute;
         SE.mute = setting.SEMute;
         BoardManager.KillKingWin = setting.KillKingWin;
+        BoardManager.IsEffectGridEnable = setting.IsEffectGridEnable;
     }
 }

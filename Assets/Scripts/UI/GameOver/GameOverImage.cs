@@ -5,16 +5,16 @@ using UnityEngine.UI;
 
 public class GameOverImage : MonoBehaviour
 {
-    [SerializeField] Sprite P1Win, P2Win;
+    [SerializeField] Sprite p1Win, p2Win;
     public void SetImage(string winner)
     {
         if (winner == "White")
         {
-            GetComponent<Image>().sprite = P1Win;
+            GetComponent<Image>().sprite = p1Win;
         }
         else if (winner == "Black")
         {
-            GetComponent<Image>().sprite = P2Win;
+            GetComponent<Image>().sprite = p2Win;
         }
     }
 }

@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 public class AudioImage : MonoBehaviour
 {
-    [SerializeField] AudioSource _audioSource;
-    [SerializeField] Sprite _Unmute;
-    [SerializeField] Sprite _mute;
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] Sprite unmute;
+    [SerializeField] Sprite mute;
 
     Image _image;
 
@@ -18,20 +18,20 @@ public class AudioImage : MonoBehaviour
 
     void Update()
     {
-        if (_audioSource.mute || _audioSource.volume == 0)
+        if (audioSource.mute || audioSource.volume == 0)
         {
-            _image.sprite = _mute;
+            _image.sprite = mute;
         }
         else
         {
-            _image.sprite = _Unmute;
+            _image.sprite = unmute;
 
         }
     }
 
     public void SwitchMute()
     {
-        _audioSource.mute = !_audioSource.mute;
+        audioSource.mute = !audioSource.mute;
     }
 
 }

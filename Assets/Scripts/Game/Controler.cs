@@ -8,22 +8,23 @@ public class Controler : MonoBehaviour
 {
 
     [Header("玩家")]
-    [SerializeField] PlayerType _playerType;
+    [SerializeField] PlayerType playerType;
 
     [Header("選取框")]
-    [SerializeField] GameObject _selectBox;
-    [SerializeField] GameObject _selectedBox;
-    [SerializeField] GameObject _possibleMoveBox;
+    [SerializeField] GameObject selectBox;
+    [SerializeField] GameObject selectedBox;
+    [SerializeField] GameObject possibleMoveBox;
 
     [Header("棋盤")]
-    [SerializeField] Board _board;
+    [SerializeField] Board board;
 
     [Header("選取音效")]
-    [SerializeField] AudioSource _audioSource;
+    [SerializeField] AudioSource audioSource;
 
-    public float ReverseTime = 0;
-    BoardManager _boardManager;
-    PlayerInput _playerInput;
+    [HideInInspector] public float ReverseTime = 0;
+
+    BoardManager boardManager;
+    PlayerInput playerInput;
 
     Vector2Int _selectBoxGrid = Vector2Int.zero;
     Vector2Int _selectedBoxGrid;
@@ -42,16 +43,16 @@ public class Controler : MonoBehaviour
                     Destroy(pmb);
                 _possibleMoveBoxsTemp.Clear();
             }
-            _selectedBox.SetActive(value);
+            selectedBox.SetActive(value);
         }
     }
 
     void Start()
     {
-        _selectedBox.SetActive(false);
-        _board.DrawBoard(_playerType);
-        _boardManager = GetComponentInParent<BoardManager>();
-        _playerInput = GetComponent<PlayerInput>();
+        selectedBox.SetActive(false);
+        board.DrawBoard(playerType);
+        boardManager = GetComponentInParent<BoardManager>();
+        playerInput = GetComponent<PlayerInput>();
         LoadBind();
         isSelect = false;
         BackKing();
@@ -63,7 +64,7 @@ public class Controler : MonoBehaviour
             if (IsEnemy(_selectedBoxGrid))
                 isSelect = false;
 
-        _board.DrawBoard(_playerType);
+        board.DrawBoard(playerType);
 
         if (ReverseTime > 0)
         {
@@ -82,7 +83,7 @@ public class Controler : MonoBehaviour
         }
     }
 
-    int GetChessID(Vector2Int grid) => _boardManager.GetChessID(grid, _playerType);
+    int GetChessID(Vector2Int grid) => boardManager.GetChessID(grid, playerType);
 
     bool IsOutSideBoard(Vector2Int grid) => grid.x < 0 || grid.y < 0 || grid.x > 7 || grid.y > 7;
 
@@ -90,19 +91,19 @@ public class Controler : MonoBehaviour
     {
         if (GetChessID(grid) == 7)
             return false;
-        return _playerType == PlayerType.White ? GetChessID(grid) < 0 : GetChessID(grid) > 0;
+        return playerType == PlayerType.White ? GetChessID(grid) < 0 : GetChessID(grid) > 0;
     }
 
     bool IsAllies(Vector2Int grid)
     {
         if (GetChessID(grid) == 7)
             return false;
-        return _playerType == PlayerType.White ? GetChessID(grid) > 0 : GetChessID(grid) < 0;
+        return playerType == PlayerType.White ? GetChessID(grid) > 0 : GetChessID(grid) < 0;
     }
 
     bool IsEmpty(Vector2Int grid) => GetChessID(grid) == 0 || GetChessID(grid) == 7;
 
-    void UpdateSelectBox() => _selectBox.transform.position = _board.TransformPosition(_selectBoxGrid);
+    void UpdateSelectBox() => selectBox.transform.position = board.TransformPosition(_selectBoxGrid);
 
     void Move(Direction direction)
     {
@@ -181,22 +182,22 @@ public class Controler : MonoBehaviour
             _possibleMoveGrids = GetPossibleMoveGrids();
             foreach (var grid in _possibleMoveGrids)
             {
-                var box = Instantiate(_possibleMoveBox, _board.TransformPosition(grid), Quaternion.identity);
+                var box = Instantiate(possibleMoveBox, board.TransformPosition(grid), Quaternion.identity);
                 _possibleMoveBoxsTemp.Add(box);
             }
             isSelect = true;
-            _selectedBox.transform.position = _board.TransformPosition(_selectedBoxGrid);
-            _audioSource?.Play();
+            selectedBox.transform.position = board.TransformPosition(_selectedBoxGrid);
+            audioSource?.Play();
         }
         //確認
         else if (isSelect)
         {
             if (_possibleMoveGrids.Exists(grid => grid == _selectBoxGrid))
             {
-                _boardManager.MoveChess(_selectedBoxGrid, _selectBoxGrid, _playerType);
+                boardManager.MoveChess(_selectedBoxGrid, _selectBoxGrid, playerType);
                 isSelect = false;
             }
-            _audioSource?.Play();
+            audioSource?.Play();
         }
     }
 
@@ -210,7 +211,7 @@ public class Controler : MonoBehaviour
 
     public void BackKing()
     {
-        _selectBoxGrid = _boardManager.GetKingGrid(_playerType);
+        _selectBoxGrid = boardManager.GetKingGrid(playerType);
         UpdateSelectBox();
     }
 
@@ -218,7 +219,7 @@ public class Controler : MonoBehaviour
     {
         if (!ctx.performed)
             return;
-        _selectBoxGrid = _boardManager.GetKingGrid(_playerType);
+        _selectBoxGrid = boardManager.GetKingGrid(playerType);
         UpdateSelectBox();
     }
 
@@ -248,14 +249,14 @@ public class Controler : MonoBehaviour
 
         void CheckCastling(int way)
         {
-            if (_playerType == PlayerType.White)
+            if (playerType == PlayerType.White)
             {
-                if (!_boardManager.CanCastling[0, way == -1 ? 0 : 1])
+                if (!boardManager.CanCastling[0, way == -1 ? 0 : 1])
                     return;
             }
-            else if (_playerType == PlayerType.Black)
+            else if (playerType == PlayerType.Black)
             {
-                if (!_boardManager.CanCastling[1, way == -1 ? 0 : 1])
+                if (!boardManager.CanCastling[1, way == -1 ? 0 : 1])
                     return;
             }
 
@@ -385,10 +386,10 @@ public class Controler : MonoBehaviour
             UpdaeReverseInput();
         }
 
-        _playerInput?.SwitchCurrentActionMap(mapName);
+        playerInput?.SwitchCurrentActionMap(mapName);
     }
 
-    string BindPath => Application.persistentDataPath + $"/{_playerType.ToString()}Binding.json";
+    string BindPath => Application.persistentDataPath + $"/{playerType.ToString()}Binding.json";
 
     public void RestBind()
     {
@@ -402,7 +403,7 @@ public class Controler : MonoBehaviour
 
     public void SaveBind()
     {
-        var json = _playerInput.actions.SaveBindingOverridesAsJson();
+        var json = playerInput.actions.SaveBindingOverridesAsJson();
         File.WriteAllText(BindPath, json);
     }
 
@@ -411,7 +412,7 @@ public class Controler : MonoBehaviour
         try
         {
             var json = File.ReadAllText(BindPath);
-            _playerInput.actions.LoadBindingOverridesFromJson(json);
+            playerInput.actions.LoadBindingOverridesFromJson(json);
         }
         catch (FileNotFoundException)
         {
@@ -425,21 +426,21 @@ public class Controler : MonoBehaviour
         {
             a.ApplyBindingOverride(b.bindings[0].path);
         }
-        var dUp = _playerInput.actions["Default/Up"];
-        var dDown = _playerInput.actions["Default/Down"];
-        var dLeft = _playerInput.actions["Default/Left"];
-        var dRight = _playerInput.actions["Default/Right"];
-        var dConfirm = _playerInput.actions["Default/Confirm"];
-        var dCancel = _playerInput.actions["Default/Cancel"];
-        var dBackking = _playerInput.actions["Default/BackKing"];
+        var dUp = playerInput.actions["Default/Up"];
+        var dDown = playerInput.actions["Default/Down"];
+        var dLeft = playerInput.actions["Default/Left"];
+        var dRight = playerInput.actions["Default/Right"];
+        var dConfirm = playerInput.actions["Default/Confirm"];
+        var dCancel = playerInput.actions["Default/Cancel"];
+        var dBackking = playerInput.actions["Default/BackKing"];
 
-        var rUp = _playerInput.actions["Reverse/Up"];
-        var rDown = _playerInput.actions["Reverse/Down"];
-        var rLeft = _playerInput.actions["Reverse/Left"];
-        var rRight = _playerInput.actions["Reverse/Right"];
-        var rConfirm = _playerInput.actions["Reverse/Confirm"];
-        var rCancel = _playerInput.actions["Reverse/Cancel"];
-        var rBackking = _playerInput.actions["Reverse/BackKing"];
+        var rUp = playerInput.actions["Reverse/Up"];
+        var rDown = playerInput.actions["Reverse/Down"];
+        var rLeft = playerInput.actions["Reverse/Left"];
+        var rRight = playerInput.actions["Reverse/Right"];
+        var rConfirm = playerInput.actions["Reverse/Confirm"];
+        var rCancel = playerInput.actions["Reverse/Cancel"];
+        var rBackking = playerInput.actions["Reverse/BackKing"];
 
         SetBinding(rUp, dDown);
         SetBinding(rDown, dUp);
