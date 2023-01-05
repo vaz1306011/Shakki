@@ -72,15 +72,6 @@ public class Controler : MonoBehaviour
             if (ReverseTime <= 0)
                 SetInputMap("Default");
         }
-
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            SetInputMap("Reverse");
-        }
-        else if (Input.GetKeyDown(KeyCode.X))
-        {
-            SetInputMap("Default");
-        }
     }
 
     int GetChessID(Vector2Int grid) => boardManager.GetChessID(grid, playerType);
@@ -211,7 +202,7 @@ public class Controler : MonoBehaviour
 
     public void BackKing()
     {
-        _selectBoxGrid = boardManager.GetKingGrid(playerType);
+        _selectBoxGrid = boardManager.GetKingGrid(playerType) ?? _selectBoxGrid;
         UpdateSelectBox();
     }
 
@@ -219,7 +210,8 @@ public class Controler : MonoBehaviour
     {
         if (!ctx.performed)
             return;
-        _selectBoxGrid = boardManager.GetKingGrid(playerType);
+
+        _selectBoxGrid = boardManager.GetKingGrid(playerType) ?? _selectBoxGrid;
         UpdateSelectBox();
     }
 
@@ -424,7 +416,7 @@ public class Controler : MonoBehaviour
     {
         void SetBinding(InputAction a, InputAction b)
         {
-            a.ApplyBindingOverride(b.bindings[0].path);
+            a.ApplyBindingOverride(b.bindings[0].effectivePath);
         }
         var dUp = playerInput.actions["Default/Up"];
         var dDown = playerInput.actions["Default/Down"];

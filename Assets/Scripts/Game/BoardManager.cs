@@ -82,6 +82,12 @@ public class BoardManager : MonoBehaviour
                 _nextEffectTime = UnityEngine.Random.Range(2f, 5f);
             }
         }
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            for (int i = 0; i < 8; i++)
+                print(_board[i, 0] + " " + _board[i, 1] + " " + _board[i, 2] + " " + _board[i, 3] + " " + _board[i, 4] + " " + _board[i, 5] + " " + _board[i, 6] + " " + _board[i, 7]);
+
+        }
     }
 
     public void ResetBoard()
@@ -132,7 +138,7 @@ public class BoardManager : MonoBehaviour
                     }
                     else
                     {
-                        if (_board[i, j] > 0)
+                        if (_board[i, j] > 0 && _board[i, j] != 7)
                             return false;
                     }
 
@@ -286,7 +292,7 @@ public class BoardManager : MonoBehaviour
         _board[y, x] = chessID;
     }
 
-    public Vector2Int GetKingGrid(PlayerType playerType)
+    public Vector2Int? GetKingGrid(PlayerType playerType)
     {
         var board = GetBoard(playerType);
         for (int y = 0; y < 8; y++)
@@ -296,7 +302,7 @@ public class BoardManager : MonoBehaviour
                 if (GetChessID(chessGrid, playerType) == (int)playerType * 1)
                     return chessGrid;
             }
-        return new Vector2Int(-1, -1);
+        return null;
     }
 
     public bool SetEffecGrid(Vector2Int grid)
