@@ -28,7 +28,6 @@ public class BoardManager : MonoBehaviour
     Controler p1Controler, p2Controler;
     int[,] _board;
 
-    Vector2Int _effectGrid;
     static float _nextEffectTime = 1;
     public static bool IsEffectGridEnable
     {
@@ -153,7 +152,7 @@ public class BoardManager : MonoBehaviour
         return null;
     }
 
-    void unCastling(PlayerType playerType, int way)
+    void UnCastling(PlayerType playerType, int way)
     {
         if (playerType == PlayerType.White)
             CanCastling[0, way] = false;
@@ -161,7 +160,7 @@ public class BoardManager : MonoBehaviour
             CanCastling[1, way] = false;
     }
 
-    void unCastlingAll(PlayerType playerType)
+    void UnCastlingAll(PlayerType playerType)
     {
         if (playerType == PlayerType.White)
         {
@@ -219,18 +218,18 @@ public class BoardManager : MonoBehaviour
         #region 王車易位
         //國王移動判斷
         if (GetChessID(target) == (int)playerType * 1)
-            unCastlingAll(playerType);
+            UnCastlingAll(playerType);
         //城堡移動判斷
         if (GetChessID(target) == (int)playerType * 5)
         {
             if (start == new Vector2Int(0, 0)) //白左
-                unCastling(PlayerType.White, 0);
+                UnCastling(PlayerType.White, 0);
             else if (start == new Vector2Int(7, 0)) //白右
-                unCastling(PlayerType.White, 1);
+                UnCastling(PlayerType.White, 1);
             else if (start == new Vector2Int(7, 7)) //黑左
-                unCastling(PlayerType.Black, 0);
+                UnCastling(PlayerType.Black, 0);
             else if (start == new Vector2Int(0, 7)) //黑右
-                unCastling(PlayerType.Black, 1);
+                UnCastling(PlayerType.Black, 1);
         }
         //易位執行
         if (GetChessID(target) == (int)playerType * 1 && Mathf.Abs(target.x - start.x) == 2)
@@ -249,7 +248,7 @@ public class BoardManager : MonoBehaviour
                 SetChess(0, 7, target.y);
                 SetChess((int)playerType * 5, target.x - 1, target.y);
             }
-            unCastlingAll(playerType);
+            UnCastlingAll(playerType);
         }
         #endregion
     }
@@ -294,7 +293,6 @@ public class BoardManager : MonoBehaviour
 
     public Vector2Int? GetKingGrid(PlayerType playerType)
     {
-        var board = GetBoard(playerType);
         for (int y = 0; y < 8; y++)
             for (int x = 0; x < 8; x++)
             {
