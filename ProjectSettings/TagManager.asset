@@ -45,6 +45,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: PossibleMoveBox
+    uniqueID: 648272955
+    locked: 0
   - name: SelectBox
     uniqueID: 3288729893
     locked: 0
