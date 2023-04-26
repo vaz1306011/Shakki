@@ -7,18 +7,18 @@ using UnityEngine.InputSystem;
 public class Controler : MonoBehaviour
 {
 
-    [Header("ª±®a")]
+    [Header("ç©å®¶")]
     [SerializeField] PlayerType playerType;
 
-    [Header("¿ï¨ú®Ø")]
+    [Header("é¸å–æ¡†")]
     [SerializeField] GameObject selectBox;
     [SerializeField] GameObject selectedBox;
     [SerializeField] GameObject possibleMoveBox;
 
-    [Header("´Ñ½L")]
+    [Header("æ£‹ç›¤")]
     [SerializeField] Board board;
 
-    [Header("¿ï¨ú­µ®Ä")]
+    [Header("é¸å–éŸ³æ•ˆ")]
     [SerializeField] AudioSource audioSource;
 
     [HideInInspector] public float ReverseTime = 0;
@@ -166,7 +166,7 @@ public class Controler : MonoBehaviour
         if (!ctx.performed)
             return;
 
-        //¿ï¾Ü
+        //é¸æ“‡
         if (!isSelect && IsAllies(_selectBoxGrid))
         {
             _selectedBoxGrid = _selectBoxGrid;
@@ -180,7 +180,7 @@ public class Controler : MonoBehaviour
             selectedBox.transform.position = board.TransformPosition(_selectedBoxGrid);
             audioSource?.Play();
         }
-        //½T»{
+        //ç¢ºèª
         else if (isSelect)
         {
             if (_possibleMoveGrids.Exists(grid => grid == _selectBoxGrid))
@@ -218,15 +218,15 @@ public class Controler : MonoBehaviour
     List<Vector2Int> GetPossibleMoveGrids()
     {
         /* 
-         * ªÅ:0
-         * ¥Õ:+
-         * ¶Â:-
-         * °ê¤ı:1
-         * ¬Ó¦Z:2
-         * ¥D±Ğ:3
-         * ÃM¤h:4
-         * «°³ù:5
-         * ¤h§L:6
+         * ç©º:0
+         * ç™½:+
+         * é»‘:-
+         * åœ‹ç‹:1
+         * çš‡å:2
+         * ä¸»æ•™:3
+         * é¨å£«:4
+         * åŸå ¡:5
+         * å£«å…µ:6
          */
         var possibleMoveGrids = new List<Vector2Int>();
         Vector2Int grid;
@@ -283,10 +283,10 @@ public class Controler : MonoBehaviour
 
         switch (GetChessID(_selectBoxGrid))
         {
-            //°ê¤ı
+            //åœ‹ç‹
             case 1:
             case -1:
-                //¥¿±`²¾°Ê
+                //æ­£å¸¸ç§»å‹•
                 for (var i = -1; i <= 1; i++)
                     for (var j = -1; j <= 1; j++)
                     {
@@ -294,12 +294,12 @@ public class Controler : MonoBehaviour
                         AddGrid();
                     }
 
-                //¤ı¨®©ö¦ì
-                CheckCastling(-1); //¥ªÃä
-                CheckCastling(1);  //¥kÃä
+                //ç‹è»Šæ˜“ä½
+                CheckCastling(-1); //å·¦é‚Š
+                CheckCastling(1);  //å³é‚Š
                 break;
 
-            //¬Ó¦Z 
+            //çš‡å 
             case 2:
             case -2:
                 for (var i = -1; i <= 1; i++)
@@ -307,7 +307,7 @@ public class Controler : MonoBehaviour
                         WalkLine(i, j);
                 break;
 
-            //¥D±Ğ
+            //ä¸»æ•™
             case 3:
             case -3:
                 for (var i = -1; i <= 1; i += 2)
@@ -316,7 +316,7 @@ public class Controler : MonoBehaviour
 
                 break;
 
-            //ÃM¤h
+            //é¨å£«
             case 4:
             case -4:
                 for (var i = -1; i <= 1; i += 2)
@@ -333,7 +333,7 @@ public class Controler : MonoBehaviour
                     }
                 break;
 
-            //«°³ù
+            //åŸå ¡
             case 5:
             case -5:
                 WalkLine(0, 1);
@@ -342,26 +342,26 @@ public class Controler : MonoBehaviour
                 WalkLine(-1, 0);
                 break;
 
-            //¤h§L
+            //å£«å…µ
             case 6:
             case -6:
-                //¥ª«e¼Ä¤H
+                //å·¦å‰æ•µäºº
                 grid = _selectedBoxGrid + new Vector2Int(-1, 1);
                 if (!IsOutSideBoard(grid) && IsEnemy(grid))
                     AddGrid();
 
-                //¥k«e¼Ä¤H
+                //å³å‰æ•µäºº
                 grid = _selectedBoxGrid + new Vector2Int(1, 1);
                 if (!IsOutSideBoard(grid) && IsEnemy(grid))
                     AddGrid();
 
-                //¥¿±`²¾°Ê
+                //æ­£å¸¸ç§»å‹•
                 grid = _selectedBoxGrid + Vector2Int.up;
                 if (!IsOutSideBoard(grid) && !IsEmpty(grid))
                     break;
                 AddGrid();
 
-                //­º¦¸¦h²¾°Ê¤@®æ
+                //é¦–æ¬¡å¤šç§»å‹•ä¸€æ ¼
                 grid = _selectedBoxGrid + Vector2Int.up * 2;
                 if (_selectBoxGrid.y == 1 && IsEmpty(grid))
                     AddGrid();

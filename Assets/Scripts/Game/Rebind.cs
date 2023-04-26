@@ -31,7 +31,7 @@ public class Rebind : MonoBehaviour
     public void Rebinding()
     {
         _text.transform.parent.GetComponent<Image>().color = new Color(255, 140, 0, 255);
-        _text.SetText("�п�J...");
+        _text.SetText("請輸入...");
         _ref.action.PerformInteractiveRebinding()
         .OnMatchWaitForAnother(.1f)
         .WithCancelingThrough("<Keyboard>/escape")

@@ -8,16 +8,16 @@ using UnityEngine.Events;
 public class BoardManager : MonoBehaviour
 {
     /* 
-     * ªÅ:0
-     * ¥Õ:+
-     * ¶Â:-
-     * °ê¤ı:1
-     * ¬Ó¦Z:2
-     * ¥D±Ğ:3
-     * ÃM¤h:4
-     * «°³ù:5
-     * ¤h§L:6
-     * ®ÄªG®æ:7
+     * ç©º:0
+     * ç™½:+
+     * é»‘:-
+     * åœ‹ç‹:1
+     * çš‡å:2
+     * ä¸»æ•™:3
+     * é¨å£«:4
+     * åŸå ¡:5
+     * å£«å…µ:6
+     * æ•ˆæœæ ¼:7
      */
     [SerializeField] GameObject effectBox;
     [SerializeField] StringEvent GameOver;
@@ -176,14 +176,14 @@ public class BoardManager : MonoBehaviour
 
     public void MoveChess(Vector2Int start, Vector2Int target, PlayerType playerType)
     {
-        //Âà¦¨¥Õ¤è¤è¦V
+        //è½‰æˆç™½æ–¹æ–¹å‘
         if (playerType == PlayerType.Black)
         {
             start = Vector2Int.one * 7 - start;
             target = Vector2Int.one * 7 - target;
         }
 
-        //¯S®í®æ
+        //ç‰¹æ®Šæ ¼
         if (GetChessID(target) == 7)
         {
             if (playerType == PlayerType.White)
@@ -198,7 +198,7 @@ public class BoardManager : MonoBehaviour
             };
         }
 
-        //²¾°Ê
+        //ç§»å‹•
         SetChess(GetChessID(start), target);
         SetChess(0, start);
 
@@ -209,39 +209,39 @@ public class BoardManager : MonoBehaviour
             return;
         }
 
-        //§L¤ÉÅÜ
+        //å…µå‡è®Š
         if (GetChessID(target) == (int)playerType * 6 &&
             (target.y == 7 || target.y == 0)
             )
             SetChess((int)playerType * 2, target);
 
-        #region ¤ı¨®©ö¦ì
-        //°ê¤ı²¾°Ê§PÂ_
+        #region ç‹è»Šæ˜“ä½
+        //åœ‹ç‹ç§»å‹•åˆ¤æ–·
         if (GetChessID(target) == (int)playerType * 1)
             UnCastlingAll(playerType);
-        //«°³ù²¾°Ê§PÂ_
+        //åŸå ¡ç§»å‹•åˆ¤æ–·
         if (GetChessID(target) == (int)playerType * 5)
         {
-            if (start == new Vector2Int(0, 0)) //¥Õ¥ª
+            if (start == new Vector2Int(0, 0)) //ç™½å·¦
                 UnCastling(PlayerType.White, 0);
-            else if (start == new Vector2Int(7, 0)) //¥Õ¥k
+            else if (start == new Vector2Int(7, 0)) //ç™½å³
                 UnCastling(PlayerType.White, 1);
-            else if (start == new Vector2Int(7, 7)) //¶Â¥ª
+            else if (start == new Vector2Int(7, 7)) //é»‘å·¦
                 UnCastling(PlayerType.Black, 0);
-            else if (start == new Vector2Int(0, 7)) //¶Â¥k
+            else if (start == new Vector2Int(0, 7)) //é»‘å³
                 UnCastling(PlayerType.Black, 1);
         }
-        //©ö¦ì°õ¦æ
+        //æ˜“ä½åŸ·è¡Œ
         if (GetChessID(target) == (int)playerType * 1 && Mathf.Abs(target.x - start.x) == 2)
         {
-            if (target.x == 2) //¥ª
+            if (target.x == 2) //å·¦
             {
                 if (GetChessID(new Vector2Int(0, target.y)) != (int)playerType * 5)
                     return;
                 SetChess(0, 0, target.y);
                 SetChess((int)playerType * 5, target.x + 1, target.y);
             }
-            if (target.x == 6) //¥k
+            if (target.x == 6) //å³
             {
                 if (GetChessID(new Vector2Int(7, target.y)) != (int)playerType * 5)
                     return;
